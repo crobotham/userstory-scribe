@@ -41,49 +41,46 @@ const Auth = () => {
     state: { localLoading, isProcessingOAuth }
   });
 
-  // For debugging - render a fallback if something is wrong
-  if (!AuthHeader || !AuthForm || !AuthFooter) {
-    console.error("Missing auth components:", { AuthHeader, AuthForm, AuthFooter });
-    return (
-      <div className="p-8 text-center">
-        <h1 className="text-2xl font-bold mb-4">Authentication Page</h1>
-        <p className="text-red-500">There was an error loading the authentication components.</p>
-      </div>
-    );
-  }
-
-  // Show loading state if we're still initializing or processing OAuth
-  if (localLoading || isProcessingOAuth) {
-    return (
-      <AuthLayout>
-        <AuthLoading 
-          message={isProcessingOAuth ? "Completing authentication..." : "Loading..."}
-        />
-      </AuthLayout>
-    );
-  }
-
+  // For debugging - render a simplified view to check if basic rendering works
   return (
-    <AuthLayout>
-      {authError && (
-        <Alert variant="destructive" className="mb-6">
-          <AlertCircle className="h-4 w-4 mr-2" />
-          <AlertDescription>
-            {authError}. Please try requesting a new password reset link.
-          </AlertDescription>
-        </Alert>
-      )}
-      
-      {(isPasswordReset || isRecoveryMode) ? (
-        <PasswordResetForm onSuccess={handlePasswordResetSuccess} />
-      ) : (
-        <>
-          <AuthHeader />
-          <AuthForm />
-          <AuthFooter />
-        </>
-      )}
-    </AuthLayout>
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      <header className="py-4 px-6 bg-white border-b">
+        <div className="max-w-6xl mx-auto">
+          <div className="font-bold text-xl text-primary">SonicStories</div>
+        </div>
+      </header>
+
+      <main className="flex-1 py-12 px-4">
+        <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-sm border">
+          <h1 className="text-2xl font-bold mb-6 text-center">Authentication Page</h1>
+          
+          {authError && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertCircle className="h-4 w-4 mr-2" />
+              <AlertDescription>
+                {authError}. Please try requesting a new password reset link.
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          {(isPasswordReset || isRecoveryMode) ? (
+            <PasswordResetForm onSuccess={handlePasswordResetSuccess} />
+          ) : (
+            <>
+              <AuthHeader />
+              <AuthForm />
+              <AuthFooter />
+            </>
+          )}
+        </div>
+      </main>
+
+      <footer className="py-6 border-t bg-white">
+        <div className="max-w-6xl mx-auto px-4 text-center text-muted-foreground text-sm">
+          <p>&copy; {new Date().getFullYear()} SonicStories. All rights reserved.</p>
+        </div>
+      </footer>
+    </div>
   );
 };
 
