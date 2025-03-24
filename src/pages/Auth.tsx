@@ -35,6 +35,17 @@ const Auth = () => {
     });
   }, [localLoading, isProcessingOAuth, isPasswordReset, isRecoveryMode, authError]);
 
+  // For debugging - render a fallback if something is wrong
+  if (!AuthHeader || !AuthForm || !AuthFooter) {
+    console.error("Missing auth components:", { AuthHeader, AuthForm, AuthFooter });
+    return (
+      <div className="p-8 text-center">
+        <h1 className="text-2xl font-bold mb-4">Authentication Page</h1>
+        <p className="text-red-500">There was an error loading the authentication components.</p>
+      </div>
+    );
+  }
+
   // Show loading state if we're still initializing or processing OAuth
   if (localLoading || isProcessingOAuth) {
     return (
