@@ -17,7 +17,7 @@ const HeroSection = () => {
               Tell your user stories with clarity
             </h1>
             <p className="text-lg text-muted-foreground max-w-md">
-              Create better product user stories and acceptance criteria in seconds! Clear, comprehensive, and ready for your backlog.
+              Create better product user stories and acceptance criteria in seconds! Clear, comprehensive, and ready for your dev team.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <Button size="lg" className="gap-2" asChild>
