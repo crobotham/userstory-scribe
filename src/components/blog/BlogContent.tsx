@@ -24,7 +24,7 @@ const BlogContent: React.FC<BlogContentProps> = ({
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-20">
-        <Spinner size="lg" />
+        <Spinner className="h-8 w-8" />
       </div>
     );
   }

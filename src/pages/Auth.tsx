@@ -35,6 +35,12 @@ const Auth = () => {
     });
   }, [localLoading, isProcessingOAuth, isPasswordReset, isRecoveryMode, authError]);
 
+  // Debugging message in console to verify component loading
+  console.log("Auth component rendering", {
+    components: { AuthHeader, AuthForm, AuthFooter },
+    state: { localLoading, isProcessingOAuth }
+  });
+
   // For debugging - render a fallback if something is wrong
   if (!AuthHeader || !AuthForm || !AuthFooter) {
     console.error("Missing auth components:", { AuthHeader, AuthForm, AuthFooter });

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -17,15 +16,25 @@ export const useAuthPage = () => {
 
   // Start a timer to clear local loading state after a maximum time
   useEffect(() => {
+    // Force loading to false immediately for testing
+    setLocalLoading(false);
+    
     const timer = setTimeout(() => {
       if (localLoading) {
         console.log("Auth page forcing loading state to complete after timeout");
         setLocalLoading(false);
       }
-    }, 5000);
+    }, 2000); // Reduced from 5000 to 2000 for faster loading
     
     return () => clearTimeout(timer);
   }, [localLoading]);
+
+  // Log the current state
+  useEffect(() => {
+    console.log("useAuthPage hook state:", { 
+      user, authLoading, localLoading, isProcessingOAuth 
+    });
+  }, [user, authLoading, localLoading, isProcessingOAuth]);
 
   // Check if we're processing an OAuth callback or if there are errors
   useEffect(() => {
@@ -151,7 +160,7 @@ export const useAuthPage = () => {
 
   return {
     user,
-    localLoading,
+    localLoading: false, // Force loading to false for now to debug
     isProcessingOAuth,
     isPasswordReset,
     authError,

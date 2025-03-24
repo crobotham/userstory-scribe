@@ -16,6 +16,9 @@ const AuthLayout = ({ children, backLink }: AuthLayoutProps) => {
     window.scrollTo(0, 0);
   };
 
+  // Debug - log when the layout renders
+  console.log("AuthLayout rendering");
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <header className="py-4 px-6 bg-white border-b">
@@ -33,7 +36,7 @@ const AuthLayout = ({ children, backLink }: AuthLayoutProps) => {
       </header>
 
       <main className="flex-1 py-12 px-4">
-        <div className="max-w-md mx-auto">
+        <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-sm border">
           {children}
         </div>
       </main>
