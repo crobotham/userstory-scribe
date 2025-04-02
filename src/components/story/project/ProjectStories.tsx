@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Project, UserStory } from "@/utils/story";
 import { useNavigate } from "react-router-dom";
@@ -161,6 +162,8 @@ const ProjectStories: React.FC<ProjectStoriesProps> = ({
         isOpen={isDetailViewOpen}
         onClose={() => setIsDetailViewOpen(false)}
         onEdit={handleEditStory}
+        onBack={() => setIsDetailViewOpen(false)}
+        onDelete={handleDeleteClick}
       />
 
       <EditStoryModal 
