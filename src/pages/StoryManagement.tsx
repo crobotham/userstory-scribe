@@ -19,10 +19,10 @@ const StoryManagement = () => {
       if (!user) {
         navigate("/");
       } else {
-        // Give a larger delay to ensure components mount properly
+        // Reduced delay to improve performance
         setTimeout(() => {
           setIsPageLoading(false);
-        }, 1000);
+        }, 500); // Reduced from 1000ms to 500ms
       }
     }
   }, [user, loading, navigate]);
@@ -46,7 +46,7 @@ const StoryManagement = () => {
     return (
       <div className="flex items-center justify-center min-h-screen bg-slate-50">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+          <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto mb-3" />
           <p className="text-muted-foreground">Loading your projects...</p>
         </div>
       </div>

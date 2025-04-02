@@ -3,19 +3,22 @@ import React, { useEffect, useState } from "react";
 import { Loader2, RefreshCw, XCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 interface LoadingIndicatorProps {
   onRetry?: () => void;
   onCancel?: () => void;
   retryCount?: number;
   maxRetries?: number;
+  showFast?: boolean;
 }
 
 const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({ 
   onRetry, 
   onCancel,
   retryCount = 0,
-  maxRetries = 2
+  maxRetries = 2,
+  showFast = false
 }) => {
   const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState("Initializing story generation...");
@@ -34,7 +37,7 @@ const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({
     let currentStep = 0;
     let stuckTimer: NodeJS.Timeout;
     
-    // Simulate progress with messages
+    // Simulate progress with messages (faster if showFast is true)
     const interval = setInterval(() => {
       if (currentStep < messages.length) {
         setMessage(messages[currentStep]);
@@ -47,9 +50,9 @@ const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({
         stuckTimer = setTimeout(() => {
           setIsStuck(true);
           setMessage("Generation is taking longer than expected...");
-        }, 10000);
+        }, showFast ? 5000 : 10000); // Shorter timeout for fast mode
       }
-    }, 800);
+    }, showFast ? 400 : 800); // Faster interval for fast mode
     
     // Timer to track elapsed time
     const elapsedTimer = setInterval(() => {
@@ -61,7 +64,7 @@ const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({
       clearInterval(elapsedTimer);
       if (stuckTimer) clearTimeout(stuckTimer);
     };
-  }, []);
+  }, [showFast]);
 
   // If we're retrying, show a different message
   useEffect(() => {
@@ -74,7 +77,7 @@ const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({
   }, [retryCount, maxRetries]);
   
   // Show a timeout message if it's taking too long
-  const showTimeoutUI = elapsedTime > 30;
+  const showTimeoutUI = elapsedTime > (showFast ? 15 : 30);
   
   // Determine if we should show the stuck UI or timeout UI
   const showProblemUI = isStuck || showTimeoutUI;
@@ -111,7 +114,11 @@ const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({
         </>
       ) : (
         <>
-          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          {showFast ? (
+            <Spinner className="h-10 w-10" />
+          ) : (
+            <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          )}
           <div className="text-center">
             <p className="text-lg font-medium text-foreground mb-1">{message}</p>
             <p className="text-sm text-muted-foreground">
