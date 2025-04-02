@@ -3,7 +3,6 @@
 export * from './services/storyGenerator';
 export * from './services/storyStorage';
 export * from './services/storyRetrieval';
-export * from './services/storyDelete';
 // Re-export projectService but exclude getProjectById to avoid conflict
 export { 
   createProject, 

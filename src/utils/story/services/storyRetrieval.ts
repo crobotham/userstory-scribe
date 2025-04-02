@@ -1,6 +1,6 @@
+
 import { UserStory, StoredUserStory } from '../types';
 import { supabase } from "@/integrations/supabase/client";
-import { Json } from '@/integrations/supabase/types';
 
 // Get stories from Supabase
 export const getStoriesFromLocalStorage = async (): Promise<UserStory[]> => {
@@ -38,7 +38,7 @@ export const getStoriesFromLocalStorage = async (): Promise<UserStory[]> => {
       goal: item.goal,
       benefit: item.benefit,
       priority: determinePriority(item.description || ""), // Convert string to proper enum value
-      acceptanceCriteria: parseAcceptanceCriteria(item.acceptance_criteria), // Parse text to string array
+      acceptanceCriteria: [],
       additionalNotes: item.description,
       projectId: item.project_id,
       projectName: item.projects?.name,
@@ -50,32 +50,6 @@ export const getStoriesFromLocalStorage = async (): Promise<UserStory[]> => {
     console.error("Error fetching stories from Supabase:", err);
     throw err;
   }
-};
-
-// Helper function to safely parse acceptance criteria from text to string array
-const parseAcceptanceCriteria = (criteria: string | null): string[] => {
-  if (!criteria) return [];
-  
-  try {
-    // Try to parse as JSON first
-    const parsed = JSON.parse(criteria);
-    if (Array.isArray(parsed)) {
-      return parsed.map(item => String(item));
-    }
-    // If not an array but parsed successfully, return as single item
-    if (parsed) {
-      return [String(parsed)];
-    }
-  } catch (e) {
-    // If not valid JSON, split by newlines or return as single item
-    if (criteria.includes('\n')) {
-      return criteria.split('\n').filter(item => item.trim() !== '');
-    }
-    return [criteria];
-  }
-  
-  // Fallback: return empty array
-  return [];
 };
 
 // Helper function to determine priority from string
@@ -140,7 +114,7 @@ export const getStoriesByProject = async (projectId: string | null): Promise<Use
       goal: item.goal,
       benefit: item.benefit,
       priority: determinePriority(item.description || ""), // Use helper function
-      acceptanceCriteria: parseAcceptanceCriteria(item.acceptance_criteria), // Parse text to string array
+      acceptanceCriteria: [],
       additionalNotes: item.description,
       projectId: item.project_id,
       projectName: item.projects?.name,

@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import type { Session, User, UserMetadata } from "@supabase/supabase-js";
 import { toast } from "@/hooks/use-toast";
@@ -38,9 +39,7 @@ export const signInWithGoogle = async (): Promise<void> => {
     const origin = window.location.origin;
     
     // Set the redirect URL to the auth page on the current domain
-    // Include current URL as a parameter to allow returning to current page
-    const currentPath = window.location.pathname;
-    const redirectTo = `${origin}/auth?redirect=${encodeURIComponent(currentPath !== '/auth' ? currentPath : '/dashboard')}`;
+    const redirectTo = `${origin}/auth`;
     
     console.log(`Starting Google sign-in with redirect URL: ${redirectTo}`);
     

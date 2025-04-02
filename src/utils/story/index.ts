@@ -10,7 +10,6 @@ export {
 export * from './services/storyGenerator';
 export * from './services/storyStorage';
 export * from './services/storyRetrieval';
-export * from './services/storyDelete';
 export * from './storyService';
 export * from './exportService';
 export * from './questionFlowData';
