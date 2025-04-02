@@ -30,6 +30,12 @@ const CreateProjectPrompt: React.FC<CreateProjectPromptProps> = ({
         detail: { tab: 'stories', projectId: preselectedProjectId }
       });
       window.dispatchEvent(event);
+      
+      // Immediately dispatch a project selection event to bypass the create project prompt
+      const projectEvent = new CustomEvent('projectSelected', {
+        detail: { projectId: preselectedProjectId }
+      });
+      window.dispatchEvent(projectEvent);
     }
   }, [preselectedProjectId]);
   
@@ -52,6 +58,12 @@ const CreateProjectPrompt: React.FC<CreateProjectPromptProps> = ({
           detail: { tab: 'stories', projectId: newProject.id }
         });
         window.dispatchEvent(event);
+        
+        // Immediately dispatch a project selection event
+        const projectEvent = new CustomEvent('projectSelected', {
+          detail: { projectId: newProject.id }
+        });
+        window.dispatchEvent(projectEvent);
       }
       
       return newProject;

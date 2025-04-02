@@ -2,7 +2,8 @@
 import { useState, useCallback, useEffect } from "react";
 import { 
   Project,
-  getProjectsFromLocalStorage
+  getProjectsFromLocalStorage,
+  getProjectById
 } from "@/utils/story";
 import { useToast } from "@/contexts/ToastContext";
 
@@ -46,6 +47,46 @@ export const useProjectOperations = (
     }
   }, [setIsLoading, isLoadingRef, toast]);
   
+  // Helper method to set project from ID
+  const setProjectFromId = useCallback(async (projectId: string) => {
+    console.log("Setting project from ID:", projectId);
+    
+    // First check if we already have this project in our loaded projects
+    const existingProject = projects.find(p => p.id === projectId);
+    
+    if (existingProject) {
+      console.log("Found project in loaded projects:", existingProject.name);
+      setSelectedProject(projectId);
+    } else {
+      // Try to fetch the project directly
+      try {
+        console.log("Fetching project details directly");
+        const project = await getProjectById(projectId);
+        
+        if (project) {
+          console.log("Found project:", project.name);
+          setSelectedProject(projectId);
+          // Ensure projects are reloaded to include this project
+          loadProjects();
+        } else {
+          console.log("Project not found with ID:", projectId);
+          toast({
+            title: "Project not found",
+            description: "The selected project could not be found.",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching project:", error);
+        toast({
+          title: "Error loading project",
+          description: "There was an error loading the selected project.",
+          variant: "destructive",
+        });
+      }
+    }
+  }, [projects, toast, loadProjects]);
+  
   // Load projects on mount
   useEffect(() => {
     loadProjects();
@@ -55,6 +96,7 @@ export const useProjectOperations = (
     projects,
     selectedProject,
     setSelectedProject,
+    setProjectFromId,
     loadProjects
   };
 };

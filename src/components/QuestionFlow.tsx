@@ -40,8 +40,11 @@ const QuestionFlow: React.FC<QuestionFlowProps> = ({ initialProjectId }) => {
     if (initialProjectId) {
       console.log("Setting initial project ID in QuestionFlow:", initialProjectId);
       setProjectFromId(initialProjectId);
+      
+      // Force a project reload to ensure we have the latest data
+      loadProjects();
     }
-  }, [initialProjectId, setProjectFromId]);
+  }, [initialProjectId, setProjectFromId, loadProjects]);
   
   return (
     <div className="animate-fade-in">

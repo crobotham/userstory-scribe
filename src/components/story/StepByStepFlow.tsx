@@ -118,17 +118,16 @@ const StepByStepFlow: React.FC<StepByStepFlowProps> = ({
     return <ResultsView story={generatedStory} onReset={onReset} />;
   }
   
-  // If no projects exist, show project creation prompt
-  if (projects.length === 0) {
+  // If no projects exist AND we don't have a preselected project, show project creation prompt
+  if (projects.length === 0 && !inputs.projectId) {
     return <CreateProjectPrompt 
       onCreateProject={onCreateProject} 
       preselectedProjectId={inputs.projectId} 
     />;
   }
   
-  // First, we show the project selection step until a project is selected
-  // Skip this step if a project is already selected from URL parameters
-  if (!projectSelected) {
+  // If we have projects but none selected yet AND we don't have a preselected project, show project selection
+  if (!projectSelected && !inputs.projectId) {
     return (
       <>
         <div className="mb-6 text-center">
