@@ -7,9 +7,10 @@ interface StoriesGridProps {
   stories: UserStory[];
   onEdit: (story: UserStory) => void;
   onView: (story: UserStory) => void;
+  onDelete: (storyId: string) => void;
 }
 
-const StoriesGrid: React.FC<StoriesGridProps> = ({ stories, onEdit, onView }) => {
+const StoriesGrid: React.FC<StoriesGridProps> = ({ stories, onEdit, onView, onDelete }) => {
   return (
     <div className="grid gap-6 md:grid-cols-2">
       {stories.map((story) => (
@@ -17,7 +18,7 @@ const StoriesGrid: React.FC<StoriesGridProps> = ({ stories, onEdit, onView }) =>
           key={story.id}
           story={story}
           onEdit={onEdit}
-          onDelete={() => {}}
+          onDelete={() => onDelete(story.id)}
           onView={onView}
         />
       ))}

@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { Project, UserStory } from "@/utils/story";
+import { Project, UserStory, deleteStoryFromLocalStorage } from "@/utils/story";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { exportStoriesToExcel } from "@/utils/story/exportService";
@@ -11,6 +11,16 @@ import EditStoryModal from "@/components/EditStoryModal";
 import ProjectHeader from "./ProjectHeader";
 import EmptyStoriesView from "./EmptyStoriesView";
 import StoriesGrid from "./StoriesGrid";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface ProjectStoriesProps {
   project: Project;
@@ -32,6 +42,8 @@ const ProjectStories: React.FC<ProjectStoriesProps> = ({
   const [selectedStory, setSelectedStory] = useState<UserStory | null>(null);
   const [isDetailViewOpen, setIsDetailViewOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [storyToDelete, setStoryToDelete] = useState<string | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const handleCreateStory = () => {
     navigate(`/dashboard?projectId=${project.id}`);
@@ -45,6 +57,34 @@ const ProjectStories: React.FC<ProjectStoriesProps> = ({
   const handleEditStory = (story: UserStory) => {
     setSelectedStory(story);
     setIsEditModalOpen(true);
+  };
+
+  const handleDeleteClick = (storyId: string) => {
+    setStoryToDelete(storyId);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!storyToDelete) return;
+    
+    try {
+      await deleteStoryFromLocalStorage(storyToDelete);
+      onStoryUpdated();
+      toast({
+        title: "Story deleted",
+        description: "Your user story has been deleted successfully.",
+      });
+    } catch (error) {
+      console.error("Error deleting story:", error);
+      toast({
+        title: "Delete failed",
+        description: "There was an error deleting your story.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setStoryToDelete(null);
+    }
   };
 
   const handleStoryUpdated = () => {
@@ -111,7 +151,8 @@ const ProjectStories: React.FC<ProjectStoriesProps> = ({
         <StoriesGrid 
           stories={stories} 
           onEdit={handleEditStory} 
-          onView={handleViewStory} 
+          onView={handleViewStory}
+          onDelete={handleDeleteClick}
         />
       )}
 
@@ -131,6 +172,24 @@ const ProjectStories: React.FC<ProjectStoriesProps> = ({
         onStoryUpdated={handleStoryUpdated}
         projects={[project]}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete User Story</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this user story? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
