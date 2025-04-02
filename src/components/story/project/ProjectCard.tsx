@@ -4,25 +4,35 @@ import { Project } from "@/utils/story";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, FileText } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface ProjectCardProps {
   project: Project;
   onEdit: (project: Project) => void;
   onDelete: (project: Project) => void;
   onSelect: (project: Project) => void;
+  storyCount?: number;
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({
   project,
   onEdit,
   onDelete,
-  onSelect
+  onSelect,
+  storyCount = 0
 }) => {
   return (
     <Card className="h-full flex flex-col">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
-          <CardTitle className="text-lg">{project.name}</CardTitle>
+          <div className="flex flex-col">
+            <CardTitle className="text-lg">{project.name}</CardTitle>
+            <div className="mt-1">
+              <Badge variant="outline" className="text-xs">
+                {storyCount} {storyCount === 1 ? 'story' : 'stories'}
+              </Badge>
+            </div>
+          </div>
           <div className="flex space-x-1">
             <Button 
               variant="ghost" 

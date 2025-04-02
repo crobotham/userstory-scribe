@@ -12,6 +12,7 @@ interface ProjectListProps {
   onEdit: (project: Project) => void;
   onDelete: (project: Project) => void;
   onSelect: (project: Project) => void;
+  storyCounts?: Record<string, number>;
 }
 
 const ProjectList: React.FC<ProjectListProps> = ({
@@ -20,7 +21,8 @@ const ProjectList: React.FC<ProjectListProps> = ({
   onCreateNew,
   onEdit,
   onDelete,
-  onSelect
+  onSelect,
+  storyCounts = {}
 }) => {
   if (isLoading) {
     return (
@@ -54,6 +56,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
           onEdit={onEdit} 
           onDelete={onDelete}
           onSelect={onSelect}
+          storyCount={storyCounts[project.id] || 0}
         />
       ))}
     </div>

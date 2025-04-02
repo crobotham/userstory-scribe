@@ -17,6 +17,7 @@ import DeleteConfirmationDialog from "./DeleteConfirmationDialog";
 import ProjectList from "./project/ProjectList";
 import EditProjectDialog from "./project/EditProjectDialog";
 import ProjectStories from "./project/ProjectStories";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ProjectManagementProps {
   onProjectsChanged: () => void;
@@ -32,11 +33,34 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ onProjectsChanged
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [projectStories, setProjectStories] = useState<UserStory[]>([]);
   const [isLoadingStories, setIsLoadingStories] = useState(false);
+  const [storyCounts, setStoryCounts] = useState<Record<string, number>>({});
   const { toast } = useToast();
 
   useEffect(() => {
     loadProjects();
+    
+    // Add event listener for project selection
+    const handleProjectSelected = (event: CustomEvent) => {
+      const { projectId } = event.detail;
+      const project = projects.find(p => p.id === projectId);
+      if (project) {
+        handleProjectSelect(project);
+      }
+    };
+    
+    window.addEventListener('projectSelected', handleProjectSelected as EventListener);
+    
+    return () => {
+      window.removeEventListener('projectSelected', handleProjectSelected as EventListener);
+    };
   }, []);
+
+  // Effect to load story counts when projects change
+  useEffect(() => {
+    if (projects.length > 0) {
+      loadStoryCounts();
+    }
+  }, [projects]);
 
   const loadProjects = async () => {
     setIsLoading(true);
@@ -56,6 +80,44 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ onProjectsChanged
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadStoryCounts = async () => {
+    try {
+      // Get the current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Fetch counts for all projects
+      const { data, error } = await supabase
+        .from('user_stories')
+        .select('project_id, count')
+        .eq('user_id', user.id)
+        .group('project_id');
+
+      if (error) {
+        console.error("Error fetching story counts:", error);
+        return;
+      }
+
+      // Convert data to a map of project_id -> count
+      const counts: Record<string, number> = {};
+      projects.forEach(project => {
+        counts[project.id] = 0; // Initialize all projects with 0
+      });
+
+      if (data) {
+        data.forEach(item => {
+          if (item.project_id) {
+            counts[item.project_id] = parseInt(item.count);
+          }
+        });
+      }
+
+      setStoryCounts(counts);
+    } catch (error) {
+      console.error("Error loading story counts:", error);
     }
   };
 
@@ -186,6 +248,7 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ onProjectsChanged
               setIsDeleteDialogOpen(true);
             }}
             onSelect={handleProjectSelect}
+            storyCounts={storyCounts}
           />
         </>
       ) : (
