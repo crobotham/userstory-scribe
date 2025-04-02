@@ -70,10 +70,10 @@ const Header: React.FC<HeaderProps> = ({ isDashboard = false }) => {
               </Button>
               
               <Link 
-                to="/stories" 
+                to="/projects" 
                 className="hidden md:inline-flex text-gray-600 hover:text-gray-900 font-medium ml-2"
               >
-                Manage Stories
+                Manage Projects
               </Link>
               
               <DropdownMenu>
@@ -88,8 +88,8 @@ const Header: React.FC<HeaderProps> = ({ isDashboard = false }) => {
                   <DropdownMenuItem onClick={() => navigate('/dashboard')}>
                     Create Stories
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/stories')}>
-                    Manage Stories
+                  <DropdownMenuItem onClick={() => navigate('/projects')}>
+                    Manage Projects
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link to="/profile">Profile</Link>
@@ -157,11 +157,11 @@ const Header: React.FC<HeaderProps> = ({ isDashboard = false }) => {
                       Create Stories
                     </Button>
                     <Link 
-                      to="/stories" 
+                      to="/projects" 
                       className="text-gray-600 hover:text-gray-900 font-medium py-2" 
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
-                      Manage Stories
+                      Manage Projects
                     </Link>
                     <Button variant="ghost" asChild className="justify-start" onClick={() => setIsMobileMenuOpen(false)}>
                       <Link to="/profile">Profile</Link>

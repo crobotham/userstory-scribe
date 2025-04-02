@@ -52,9 +52,7 @@ const StoryManagement = () => {
             </p>
           </div>
           
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <StoryHistory />
-          </div>
+          <StoryHistory />
         </div>
       </main>
       
