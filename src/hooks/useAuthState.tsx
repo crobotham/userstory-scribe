@@ -10,38 +10,37 @@ export const useAuthState = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log("useAuthState: Initializing auth state");
     let isMounted = true;
+    let authStateUnsubscribe: (() => void) | undefined;
+
     const initializeAuth = async () => {
       try {
         // Set up auth state change listener first
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-          async (_event, session) => {
-            console.log("Auth state changed, event:", _event);
+          async (event, currentSession) => {
+            console.log("Auth state changed, event:", event);
             if (isMounted) {
-              setSession(session);
-              setUser(session?.user ?? null);
-              setLoading(false);
+              setSession(currentSession);
+              setUser(currentSession?.user ?? null);
+              // Only set loading to false after session is retrieved
+              if (event !== 'INITIAL_SESSION') {
+                setLoading(false);
+              }
             }
           }
         );
         
+        authStateUnsubscribe = () => subscription.unsubscribe();
+        
         // Then check for existing session
-        const { session, user } = await getSession();
+        const existingSession = await getSession();
         if (isMounted) {
-          setSession(session);
-          setUser(user);
+          console.log("useAuthState: Retrieved existing session:", !!existingSession.session);
+          setSession(existingSession.session);
+          setUser(existingSession.user);
           setLoading(false);
         }
-        
-        // Ensure loading state is cleared even if there's no auth state change event
-        setTimeout(() => {
-          if (isMounted && loading) {
-            console.log("Forcing loading state to complete after timeout");
-            setLoading(false);
-          }
-        }, 3000); // 3 second safety timeout
-        
-        return () => subscription.unsubscribe();
       } catch (error) {
         console.error("Error initializing auth:", error);
         if (isMounted) {
@@ -50,15 +49,14 @@ export const useAuthState = () => {
       }
     };
 
-    const cleanup = initializeAuth();
+    initializeAuth();
     
     return () => {
+      console.log("useAuthState: Cleaning up");
       isMounted = false;
-      cleanup.then(unsubscribe => {
-        if (typeof unsubscribe === 'function') {
-          unsubscribe();
-        }
-      });
+      if (typeof authStateUnsubscribe === 'function') {
+        authStateUnsubscribe();
+      }
     };
   }, []);
 
