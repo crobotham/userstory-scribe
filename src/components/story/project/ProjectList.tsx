@@ -11,6 +11,7 @@ interface ProjectListProps {
   onCreateNew: () => void;
   onEdit: (project: Project) => void;
   onDelete: (project: Project) => void;
+  onSelect: (project: Project) => void;
 }
 
 const ProjectList: React.FC<ProjectListProps> = ({
@@ -19,6 +20,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
   onCreateNew,
   onEdit,
   onDelete,
+  onSelect
 }) => {
   if (isLoading) {
     return (
@@ -50,7 +52,8 @@ const ProjectList: React.FC<ProjectListProps> = ({
           key={project.id} 
           project={project} 
           onEdit={onEdit} 
-          onDelete={onDelete} 
+          onDelete={onDelete}
+          onSelect={onSelect}
         />
       ))}
     </div>

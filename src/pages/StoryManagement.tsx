@@ -48,7 +48,7 @@ const StoryManagement = () => {
               Project Management
             </h1>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              View, create, and organize your projects
+              View, create, and organize your projects and stories
             </p>
           </div>
           

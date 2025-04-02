@@ -2,10 +2,12 @@
 import React, { useState, useEffect } from "react";
 import { 
   Project,
+  UserStory,
   getProjectsFromLocalStorage,
   deleteProjectFromLocalStorage,
   updateProjectInLocalStorage,
-  createProject
+  createProject,
+  getStoriesByProject
 } from "@/utils/story";
 import { Button } from "@/components/ui/button";
 import { Settings, Plus } from "lucide-react";
@@ -14,6 +16,7 @@ import NewProjectDialog from "./NewProjectDialog";
 import DeleteConfirmationDialog from "./DeleteConfirmationDialog";
 import ProjectList from "./project/ProjectList";
 import EditProjectDialog from "./project/EditProjectDialog";
+import ProjectStories from "./project/ProjectStories";
 
 interface ProjectManagementProps {
   onProjectsChanged: () => void;
@@ -26,6 +29,9 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ onProjectsChanged
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [projectStories, setProjectStories] = useState<UserStory[]>([]);
+  const [isLoadingStories, setIsLoadingStories] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -82,6 +88,11 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ onProjectsChanged
         title: "Project updated",
         description: `Project "${project.name}" has been updated successfully.`,
       });
+
+      // If the updated project was selected, update the selected project
+      if (selectedProject && selectedProject.id === project.id) {
+        setSelectedProject(project);
+      }
     } catch (error) {
       console.error("Error updating project:", error);
       toast({
@@ -98,6 +109,13 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ onProjectsChanged
     try {
       await deleteProjectFromLocalStorage(projectToDelete.id);
       await loadProjects();
+      
+      // If the deleted project was selected, clear the selection
+      if (selectedProject && selectedProject.id === projectToDelete.id) {
+        setSelectedProject(null);
+        setProjectStories([]);
+      }
+      
       toast({
         title: "Project deleted",
         description: `Project "${projectToDelete.name}" has been permanently deleted.`,
@@ -115,29 +133,69 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ onProjectsChanged
     }
   };
 
+  const handleProjectSelect = async (project: Project) => {
+    setSelectedProject(project);
+    await loadProjectStories(project.id);
+  };
+
+  const loadProjectStories = async (projectId: string) => {
+    setIsLoadingStories(true);
+    try {
+      const stories = await getStoriesByProject(projectId);
+      setProjectStories(stories);
+    } catch (error) {
+      console.error("Error loading project stories:", error);
+      toast({
+        title: "Error loading stories",
+        description: "There was a problem loading stories for this project.",
+        variant: "destructive",
+      });
+      setProjectStories([]);
+    } finally {
+      setIsLoadingStories(false);
+    }
+  };
+
+  const handleBackToProjects = () => {
+    setSelectedProject(null);
+    setProjectStories([]);
+  };
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold tracking-tight">Project Management</h2>
-        <Button 
-          onClick={() => setIsNewProjectDialogOpen(true)}
-          className="flex items-center gap-2"
-        >
-          <Plus size={16} />
-          <span>Create New Project</span>
-        </Button>
-      </div>
+      {!selectedProject ? (
+        <>
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-semibold tracking-tight">Project Management</h2>
+            <Button 
+              onClick={() => setIsNewProjectDialogOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <Plus size={16} />
+              <span>Create New Project</span>
+            </Button>
+          </div>
 
-      <ProjectList 
-        projects={projects}
-        isLoading={isLoading}
-        onCreateNew={() => setIsNewProjectDialogOpen(true)}
-        onEdit={setProjectToEdit}
-        onDelete={(project) => {
-          setProjectToDelete(project);
-          setIsDeleteDialogOpen(true);
-        }}
-      />
+          <ProjectList 
+            projects={projects}
+            isLoading={isLoading}
+            onCreateNew={() => setIsNewProjectDialogOpen(true)}
+            onEdit={setProjectToEdit}
+            onDelete={(project) => {
+              setProjectToDelete(project);
+              setIsDeleteDialogOpen(true);
+            }}
+            onSelect={handleProjectSelect}
+          />
+        </>
+      ) : (
+        <ProjectStories 
+          project={selectedProject}
+          stories={projectStories}
+          isLoading={isLoadingStories}
+          onBackClick={handleBackToProjects}
+        />
+      )}
 
       <NewProjectDialog
         isOpen={isNewProjectDialogOpen}
