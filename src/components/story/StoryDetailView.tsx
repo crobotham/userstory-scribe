@@ -1,8 +1,7 @@
-
 import React from "react";
 import { UserStory } from "@/utils/story";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, FileEdit, Trash } from "lucide-react";
+import { FileEdit, Trash } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -24,7 +23,6 @@ const StoryDetailView: React.FC<StoryDetailViewProps> = ({
   isOpen,
   onClose,
 }) => {
-  // If the component is used with Dialog (isOpen prop exists)
   if (isOpen !== undefined && onClose && story) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -40,23 +38,19 @@ const StoryDetailView: React.FC<StoryDetailViewProps> = ({
     );
   }
 
-  // Return the standard view if not using Dialog or if story is null
   if (!story) return null;
   
   return <StoryDetailContent story={story} onBack={onBack} onEdit={onEdit} onDelete={onDelete} />;
 };
 
-// Separate the content to avoid duplication
 const StoryDetailContent: React.FC<{
   story: UserStory;
   onBack: () => void;
   onEdit: (story: UserStory) => void;
   onDelete: (storyId: string) => void;
 }> = ({ story, onBack, onEdit, onDelete }) => {
-  // Format date
   const formattedDate = new Date(story.createdAt).toLocaleString();
   
-  // Ensure acceptance criteria is an array
   const acceptanceCriteria = story.acceptanceCriteria && Array.isArray(story.acceptanceCriteria) 
     ? story.acceptanceCriteria 
     : [];
@@ -70,11 +64,20 @@ const StoryDetailContent: React.FC<{
           onClick={onBack}
           className="flex items-center gap-1"
         >
-          <ArrowLeft className="h-4 w-4" />
           Back
         </Button>
         
         <div className="flex-1" />
+        
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => onDelete(story.id)}
+          className="flex items-center gap-1 mr-2"
+        >
+          <Trash className="h-4 w-4" />
+          Delete
+        </Button>
         
         <Button
           variant="outline"
@@ -84,16 +87,6 @@ const StoryDetailContent: React.FC<{
         >
           <FileEdit className="h-4 w-4" />
           Edit
-        </Button>
-        
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={() => onDelete(story.id)}
-          className="flex items-center gap-1"
-        >
-          <Trash className="h-4 w-4" />
-          Delete
         </Button>
       </div>
       
