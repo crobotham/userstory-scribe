@@ -1,117 +1,41 @@
-import React, { useState, useEffect } from "react";
-import { 
-  Project,
-  UserStory,
-  getProjectsFromLocalStorage,
-  deleteProjectFromLocalStorage,
-  updateProjectInLocalStorage,
-  createProject,
-  getStoriesByProject
-} from "@/utils/story";
-import { Button } from "@/components/ui/button";
-import { Settings, Plus } from "lucide-react";
+
+import React from "react";
+import { Project } from "@/utils/story";
 import { useToast } from "@/hooks/use-toast";
 import NewProjectDialog from "./NewProjectDialog";
 import DeleteConfirmationDialog from "./DeleteConfirmationDialog";
 import ProjectList from "./project/ProjectList";
 import EditProjectDialog from "./project/EditProjectDialog";
 import ProjectStories from "./project/ProjectStories";
-import { supabase } from "@/integrations/supabase/client";
+import ProjectActions from "./project/ProjectActions";
+import { useProjectManagementState } from "@/hooks/useProjectManagementState";
+import { createProject, updateProjectInLocalStorage, deleteProjectFromLocalStorage } from "@/utils/story";
 
 interface ProjectManagementProps {
   onProjectsChanged: () => void;
 }
 
 const ProjectManagement: React.FC<ProjectManagementProps> = ({ onProjectsChanged }) => {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
-  const [projectToEdit, setProjectToEdit] = useState<Project | null>(null);
-  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [projectStories, setProjectStories] = useState<UserStory[]>([]);
-  const [isLoadingStories, setIsLoadingStories] = useState(false);
-  const [storyCounts, setStoryCounts] = useState<Record<string, number>>({});
   const { toast } = useToast();
-
-  useEffect(() => {
-    loadProjects();
-    
-    const handleProjectSelected = (event: CustomEvent) => {
-      const { projectId } = event.detail;
-      const project = projects.find(p => p.id === projectId);
-      if (project) {
-        handleProjectSelect(project);
-      }
-    };
-    
-    window.addEventListener('projectSelected', handleProjectSelected as EventListener);
-    
-    return () => {
-      window.removeEventListener('projectSelected', handleProjectSelected as EventListener);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (projects.length > 0) {
-      loadStoryCounts();
-    }
-  }, [projects]);
-
-  const loadProjects = async () => {
-    setIsLoading(true);
-    try {
-      const loadedProjects = await getProjectsFromLocalStorage();
-      loadedProjects.sort((a, b) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-      setProjects(loadedProjects);
-      onProjectsChanged();
-    } catch (error) {
-      console.error("Error loading projects:", error);
-      toast({
-        title: "Error loading projects",
-        description: "There was a problem loading your projects.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const loadStoryCounts = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const counts: Record<string, number> = {};
-      projects.forEach(project => {
-        counts[project.id] = 0;
-      });
-
-      for (const project of projects) {
-        const { data, error } = await supabase
-          .from('user_stories')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('project_id', project.id);
-
-        if (error) {
-          console.error(`Error fetching stories for project ${project.id}:`, error);
-          continue;
-        }
-
-        if (data) {
-          counts[project.id] = data.length;
-        }
-      }
-
-      setStoryCounts(counts);
-    } catch (error) {
-      console.error("Error loading story counts:", error);
-    }
-  };
+  const {
+    projects,
+    isNewProjectDialogOpen,
+    projectToEdit,
+    projectToDelete,
+    isDeleteDialogOpen,
+    isLoading,
+    selectedProject,
+    projectStories,
+    isLoadingStories,
+    storyCounts,
+    setIsNewProjectDialogOpen,
+    setProjectToEdit,
+    setProjectToDelete,
+    setIsDeleteDialogOpen,
+    loadProjects,
+    handleProjectSelect,
+    handleBackToProjects
+  } = useProjectManagementState(onProjectsChanged);
 
   const handleCreateProject = async (name: string, description?: string) => {
     try {
@@ -144,7 +68,7 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ onProjectsChanged
       });
 
       if (selectedProject && selectedProject.id === project.id) {
-        setSelectedProject(project);
+        handleProjectSelect(project);
       }
     } catch (error) {
       console.error("Error updating project:", error);
@@ -164,8 +88,7 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ onProjectsChanged
       await loadProjects();
       
       if (selectedProject && selectedProject.id === projectToDelete.id) {
-        setSelectedProject(null);
-        setProjectStories([]);
+        handleBackToProjects();
       }
       
       toast({
@@ -185,48 +108,11 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ onProjectsChanged
     }
   };
 
-  const handleProjectSelect = async (project: Project) => {
-    setSelectedProject(project);
-    await loadProjectStories(project.id);
-  };
-
-  const loadProjectStories = async (projectId: string) => {
-    setIsLoadingStories(true);
-    try {
-      const stories = await getStoriesByProject(projectId);
-      setProjectStories(stories);
-    } catch (error) {
-      console.error("Error loading project stories:", error);
-      toast({
-        title: "Error loading stories",
-        description: "There was a problem loading stories for this project.",
-        variant: "destructive",
-      });
-      setProjectStories([]);
-    } finally {
-      setIsLoadingStories(false);
-    }
-  };
-
-  const handleBackToProjects = () => {
-    setSelectedProject(null);
-    setProjectStories([]);
-  };
-
   return (
     <div className="space-y-6">
       {!selectedProject ? (
         <>
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-semibold tracking-tight">Project Management</h2>
-            <Button 
-              onClick={() => setIsNewProjectDialogOpen(true)}
-              className="flex items-center gap-2"
-            >
-              <Plus size={16} />
-              <span>Create New Project</span>
-            </Button>
-          </div>
+          <ProjectActions onCreateNew={() => setIsNewProjectDialogOpen(true)} />
 
           <ProjectList 
             projects={projects}
