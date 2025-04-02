@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,9 +33,21 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
   const [confirmationText, setConfirmationText] = useState("");
   const isDeleteDisabled = requireNameConfirmation && confirmationText !== itemName;
   
+  // Reset the confirmation text when dialog opens or closes
+  useEffect(() => {
+    if (!isOpen) {
+      setConfirmationText("");
+    }
+  }, [isOpen]);
+  
   const handleConfirmDelete = () => {
     onConfirmDelete();
     setConfirmationText(""); // Reset the input field after confirmation
+  };
+
+  const handleCancel = () => {
+    setConfirmationText(""); // Reset the input field when canceling
+    onOpenChange(false);
   };
 
   return (
@@ -66,7 +78,7 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => setConfirmationText("")}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel onClick={handleCancel}>Cancel</AlertDialogCancel>
           <AlertDialogAction 
             onClick={handleConfirmDelete} 
             className="bg-destructive text-destructive-foreground"

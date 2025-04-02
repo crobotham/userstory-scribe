@@ -83,9 +83,17 @@ const ProjectStories: React.FC<ProjectStoriesProps> = ({
         variant: "destructive",
       });
     } finally {
+      // Ensure we reset all state related to delete operation
       setIsDeleteDialogOpen(false);
       setStoryToDelete(null);
+      setIsDetailViewOpen(false); // Close the detail view as well
     }
+  };
+
+  // Handler for canceling delete operation
+  const handleCancelDelete = () => {
+    setIsDeleteDialogOpen(false);
+    setStoryToDelete(null);
   };
 
   const handleStoryUpdated = () => {
@@ -130,6 +138,12 @@ const ProjectStories: React.FC<ProjectStoriesProps> = ({
     });
   };
 
+  // Close detail view and ensure all modals are properly closed
+  const handleCloseDetailView = () => {
+    setIsDetailViewOpen(false);
+    setSelectedStory(null);
+  };
+
   return (
     <div className="space-y-6">
       <ProjectHeader 
@@ -160,9 +174,9 @@ const ProjectStories: React.FC<ProjectStoriesProps> = ({
       <StoryDetailView 
         story={selectedStory}
         isOpen={isDetailViewOpen}
-        onClose={() => setIsDetailViewOpen(false)}
+        onClose={handleCloseDetailView}
         onEdit={handleEditStory}
-        onBack={() => setIsDetailViewOpen(false)}
+        onBack={handleCloseDetailView}
         onDelete={handleDeleteClick}
       />
 
@@ -174,7 +188,14 @@ const ProjectStories: React.FC<ProjectStoriesProps> = ({
         projects={[project]}
       />
 
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialog 
+        open={isDeleteDialogOpen} 
+        onOpenChange={(open) => {
+          if (!open) {
+            handleCancelDelete();
+          }
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete User Story</AlertDialogTitle>
@@ -183,7 +204,7 @@ const ProjectStories: React.FC<ProjectStoriesProps> = ({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel onClick={handleCancelDelete}>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               Delete
             </AlertDialogAction>
