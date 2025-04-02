@@ -41,11 +41,8 @@ export const useProjectOperations = (
         variant: "destructive",
       });
     } finally {
-      // Reduced timeout for faster loading
-      setTimeout(() => {
-        setIsLoading(false);
-        isLoadingRef.current = false;
-      }, 200); // Reduced from default timeout to improve performance
+      setIsLoading(false);
+      isLoadingRef.current = false;
     }
   }, [setIsLoading, isLoadingRef, toast]);
   

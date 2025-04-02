@@ -27,17 +27,7 @@ const DeleteStoryHandler: React.FC<DeleteStoryHandlerProps> = ({
     
     try {
       await deleteStoryFromLocalStorage(storyToDelete);
-      
-      // First update the detail view state
-      setIsDetailViewOpen(false);
-      
-      // Then update dialog states
-      setIsDeleteDialogOpen(false);
-      setStoryToDelete(null);
-      
-      // Notify parent components about the update
       onStoryUpdated();
-      
       toast({
         title: "Story deleted",
         description: "Your user story has been deleted successfully.",
@@ -49,28 +39,23 @@ const DeleteStoryHandler: React.FC<DeleteStoryHandlerProps> = ({
         description: "There was an error deleting your story.",
         variant: "destructive",
       });
-      
-      // Make sure to clean up dialog state even on error
+    } finally {
       setIsDeleteDialogOpen(false);
       setStoryToDelete(null);
+      setIsDetailViewOpen(false);
     }
   };
 
   const handleCancelDelete = () => {
-    console.log("Cancel delete operation");
-    // Important: Keep order to avoid state conflicts
     setIsDeleteDialogOpen(false);
     setStoryToDelete(null);
-    
-    // Do NOT close detail view when canceling deletion
-    // This detail view will be handled by the parent component
+    // Keep detail view open if user cancels deletion
   };
 
   return (
     <DeleteConfirmationDialog
       isOpen={isDeleteDialogOpen}
       onOpenChange={(open) => {
-        console.log("Delete dialog open state changing to:", open);
         if (!open) {
           handleCancelDelete();
         }

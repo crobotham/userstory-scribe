@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
@@ -12,13 +12,6 @@ const StoryManagement = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isPageLoading, setIsPageLoading] = useState(true);
-  const [refreshKey, setRefreshKey] = useState(0);
-
-  // Function to force ProjectManagement component to re-mount
-  const handleProjectsChanged = useCallback(() => {
-    console.log("Projects changed, forcing refresh");
-    setRefreshKey(prev => prev + 1);
-  }, []);
 
   // Redirect unauthenticated users to home page
   useEffect(() => {
@@ -26,36 +19,34 @@ const StoryManagement = () => {
       if (!user) {
         navigate("/");
       } else {
-        // Reduced delay to improve performance
+        // Give a larger delay to ensure components mount properly
         setTimeout(() => {
           setIsPageLoading(false);
-        }, 200); // Reduced delay further
+        }, 1000);
       }
     }
   }, [user, loading, navigate]);
 
   // Check URL parameters for project selection
   useEffect(() => {
-    if (!isPageLoading && user) {
-      const searchParams = new URLSearchParams(location.search);
-      const projectId = searchParams.get('projectId');
-      
-      if (projectId) {
-        console.log("StoryManagement detected projectId in URL:", projectId);
-        // Dispatch an event that ProjectManagement listens for
-        const event = new CustomEvent('projectSelected', {
-          detail: { projectId }
-        });
-        window.dispatchEvent(event);
-      }
+    const searchParams = new URLSearchParams(location.search);
+    const projectId = searchParams.get('projectId');
+    
+    if (projectId) {
+      console.log("StoryManagement detected projectId in URL:", projectId);
+      // Dispatch an event that ProjectManagement listens for
+      const event = new CustomEvent('projectSelected', {
+        detail: { projectId }
+      });
+      window.dispatchEvent(event);
     }
-  }, [location.search, isPageLoading, user]); // Add dependencies
+  }, [location.search]); // Only depend on location.search to prevent re-runs
 
   if (loading || isPageLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-slate-50">
         <div className="text-center">
-          <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto mb-3" />
+          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
           <p className="text-muted-foreground">Loading your projects...</p>
         </div>
       </div>
@@ -78,10 +69,7 @@ const StoryManagement = () => {
           </div>
           
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <ProjectManagement 
-              key={refreshKey} 
-              onProjectsChanged={handleProjectsChanged} 
-            />
+            <ProjectManagement onProjectsChanged={() => {}} />
           </div>
         </div>
       </main>

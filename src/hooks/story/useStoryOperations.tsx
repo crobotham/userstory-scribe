@@ -64,12 +64,12 @@ export const useStoryOperations = (
         variant: "destructive",
       });
     } finally {
-      // Reduced delay to improve perceived performance
+      // Longer delay to prevent flickering and ensure data is fully loaded
       setTimeout(() => {
         setIsLoading(false);
         isLoadingRef.current = false;
         console.log("Story loading complete, loading state cleared");
-      }, 300); // Reduced from 1000ms to 300ms for better user experience
+      }, 1000); // Increased to 1000ms to ensure data is fully loaded
     }
   }, [setIsLoading, isLoadingRef, toast]);
 
