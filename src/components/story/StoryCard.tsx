@@ -10,7 +10,8 @@ import {
   MoreVertical,
   FileText,
   Download,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Eye
 } from "lucide-react";
 import { 
   DropdownMenu,
@@ -26,9 +27,15 @@ interface StoryCardProps {
   story: UserStory;
   onEdit: (story: UserStory) => void;
   onDelete: (storyId: string) => void;
+  onView?: (story: UserStory) => void;
 }
 
-const StoryCard: React.FC<StoryCardProps> = ({ story, onEdit, onDelete }) => {
+const StoryCard: React.FC<StoryCardProps> = ({ 
+  story, 
+  onEdit, 
+  onDelete,
+  onView 
+}) => {
   const priorityColors: Record<string, string> = {
     "High": "bg-red-100 text-red-800",
     "Medium": "bg-yellow-100 text-yellow-800",
@@ -106,6 +113,16 @@ const StoryCard: React.FC<StoryCardProps> = ({ story, onEdit, onDelete }) => {
         </div>
         
         <div className="flex gap-2">
+          {onView && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onView(story)}
+              className="h-8 px-2"
+            >
+              <Eye size={14} />
+            </Button>
+          )}
           <Button
             variant="outline"
             size="sm"

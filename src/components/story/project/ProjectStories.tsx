@@ -21,25 +21,50 @@ import {
 import { exportStoriesToExcel } from "@/utils/story/exportService";
 import { exportStoriesToPdf } from "@/utils/story/exportPdfService";
 import { useToast } from "@/hooks/use-toast";
+import StoryDetailView from "../StoryDetailView";
+import EditStoryModal from "@/components/EditStoryModal";
 
 interface ProjectStoriesProps {
   project: Project;
   stories: UserStory[];
   isLoading: boolean;
   onBackClick: () => void;
+  onStoryUpdated?: () => void;
 }
 
 const ProjectStories: React.FC<ProjectStoriesProps> = ({
   project,
   stories,
   isLoading,
-  onBackClick
+  onBackClick,
+  onStoryUpdated = () => {}
 }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [selectedStory, setSelectedStory] = useState<UserStory | null>(null);
+  const [isDetailViewOpen, setIsDetailViewOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const handleCreateStory = () => {
     navigate(`/dashboard?projectId=${project.id}`);
+  };
+
+  const handleViewStory = (story: UserStory) => {
+    setSelectedStory(story);
+    setIsDetailViewOpen(true);
+  };
+
+  const handleEditStory = (story: UserStory) => {
+    setSelectedStory(story);
+    setIsEditModalOpen(true);
+  };
+
+  const handleStoryUpdated = () => {
+    onStoryUpdated();
+    toast({
+      title: "Story updated",
+      description: "Your user story has been updated successfully.",
+    });
   };
 
   const handleExportToPdf = () => {
@@ -147,12 +172,30 @@ const ProjectStories: React.FC<ProjectStoriesProps> = ({
             <StoryCard
               key={story.id}
               story={story}
-              onEdit={() => {}}
+              onEdit={handleEditStory}
               onDelete={() => {}}
+              onView={handleViewStory}
             />
           ))}
         </div>
       )}
+
+      {/* Detail View Modal */}
+      <StoryDetailView 
+        story={selectedStory}
+        isOpen={isDetailViewOpen}
+        onClose={() => setIsDetailViewOpen(false)}
+        onEdit={handleEditStory}
+      />
+
+      {/* Edit Modal */}
+      <EditStoryModal 
+        story={selectedStory}
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onStoryUpdated={handleStoryUpdated}
+        projects={[project]}
+      />
     </div>
   );
 };
