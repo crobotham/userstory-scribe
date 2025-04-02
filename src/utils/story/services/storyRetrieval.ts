@@ -1,162 +1,168 @@
 
-import { UserStory, StoredUserStory } from '../types';
+import { UserStory, Project } from '../types';
 import { supabase } from "@/integrations/supabase/client";
 
-// Utility function to parse acceptance criteria
-const parseAcceptanceCriteria = (criteria: string | null): string[] => {
-  if (!criteria) return [];
-  try {
-    // Try parsing as JSON array
-    console.log("Parsing acceptance criteria:", criteria);
-    const parsed = JSON.parse(criteria);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (error) {
-    console.error("Error parsing acceptance criteria:", error);
-    // If parsing fails, return an empty array
-    return [];
-  }
-};
-
-// Get stories from Supabase
+// Retrieve stories from Supabase for the logged-in user
 export const getStoriesFromLocalStorage = async (): Promise<UserStory[]> => {
-  // Get current user
-  const { data: { user } } = await supabase.auth.getUser();
-  
-  if (!user) {
-    console.log("No authenticated user, returning empty stories array");
-    return [];
-  }
+  console.log("Retrieving all stories from Supabase");
   
   try {
-    // Get stories from Supabase
-    console.log("Fetching stories from Supabase for user:", user.id);
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      throw new Error("Authentication required to retrieve stories");
+    }
+    
     const { data, error } = await supabase
       .from('user_stories')
-      .select('*, projects(name)')
-      .eq('user_id', user.id);
+      .select(`
+        id, 
+        title, 
+        description, 
+        persona, 
+        goal, 
+        benefit, 
+        acceptance_criteria,
+        created_at,
+        updated_at,
+        project_id,
+        projects(name)
+      `)
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
     
     if (error) {
-      console.error("Error fetching from Supabase:", error);
+      console.error("Error retrieving stories from Supabase:", error);
       throw error;
     }
     
+    // If no stories found, return an empty array
     if (!data || data.length === 0) {
-      console.log("No stories found in Supabase");
+      console.log("No stories found for user:", user.id);
       return [];
     }
     
-    console.log("Found stories in Supabase:", data.length);
-    // Map Supabase data to UserStory format
-    const stories = data.map(item => {
-      const acceptanceCriteria = parseAcceptanceCriteria(item.acceptance_criteria);
-      console.log(`Story ${item.id} has ${acceptanceCriteria.length} acceptance criteria`);
+    // Transform the data into UserStory objects
+    return data.map(story => {
+      // Parse the acceptance criteria from JSON string to array, handling fallbacks
+      let acceptanceCriteria: string[] = [];
+      
+      if (story.acceptance_criteria) {
+        try {
+          // Try to parse the JSON string
+          acceptanceCriteria = JSON.parse(story.acceptance_criteria);
+          // Ensure it's an array
+          if (!Array.isArray(acceptanceCriteria)) {
+            acceptanceCriteria = [];
+          }
+        } catch (e) {
+          console.error("Error parsing acceptance criteria:", e);
+          acceptanceCriteria = [];
+        }
+      }
+      
+      // Use project name from the joined projects table
+      const projectName = story.projects ? story.projects.name : undefined;
       
       return {
-        id: item.id,
-        role: item.persona,
-        goal: item.goal,
-        benefit: item.benefit,
-        priority: determinePriority(item.description || ""), // Convert string to proper enum value
-        // Parse acceptance criteria from the stored JSON string
+        id: story.id,
+        storyText: story.title,
+        role: story.persona,
+        goal: story.goal,
+        benefit: story.benefit,
+        additionalNotes: story.description,
         acceptanceCriteria: acceptanceCriteria,
-        additionalNotes: item.description,
-        projectId: item.project_id,
-        projectName: item.projects?.name,
-        storyText: `As a ${item.persona}, I want to ${item.goal}, so that ${item.benefit}.`,
-        createdAt: new Date(item.created_at),
-        userId: item.user_id
+        createdAt: new Date(story.created_at),
+        projectId: story.project_id,
+        projectName: projectName,
+        priority: "Medium" // Default priority since it's not stored
       };
     });
-    
-    return stories;
-  } catch (err) {
-    console.error("Error fetching stories from Supabase:", err);
-    throw err;
+  } catch (error) {
+    console.error("Error retrieving stories:", error);
+    throw error;
   }
 };
 
-// Helper function to determine priority from string
-const determinePriority = (description: string): "High" | "Medium" | "Low" => {
-  const lowercaseDesc = description.toLowerCase();
-  if (lowercaseDesc.includes("high priority") || lowercaseDesc.includes("urgent")) {
-    return "High";
-  } else if (lowercaseDesc.includes("low priority")) {
-    return "Low";
-  } else {
-    // Default to Medium if no clear indicator
-    return "Medium";
-  }
-};
-
-// Similar changes for getStoriesByProject
-export const getStoriesByProject = async (projectId: string | null): Promise<UserStory[]> => {
-  console.log("getStoriesByProject called with projectId:", projectId);
-  
-  // Get current user
-  const { data: { user } } = await supabase.auth.getUser();
-  
-  if (!user) {
-    console.log("No authenticated user, returning empty stories array");
-    return [];
-  }
+// Retrieve stories for a specific project
+export const getStoriesByProject = async (projectId: string): Promise<UserStory[]> => {
+  console.log("Retrieving stories for project:", projectId);
   
   try {
-    let query = supabase
-      .from('user_stories')
-      .select('*, projects(name)')
-      .eq('user_id', user.id);
+    const { data: { user } } = await supabase.auth.getUser();
     
-    // Apply project filter if provided
-    if (projectId) {
-      // Normalize the target project ID for comparison
-      const targetProjectId = projectId.toString().trim();
-      console.log(`Filtering stories for project ID: "${targetProjectId}"`);
-      
-      query = query.eq('project_id', targetProjectId);
+    if (!user) {
+      throw new Error("Authentication required to retrieve stories");
     }
     
-    const { data, error } = await query;
+    const { data, error } = await supabase
+      .from('user_stories')
+      .select(`
+        id, 
+        title, 
+        description, 
+        persona, 
+        goal, 
+        benefit, 
+        acceptance_criteria,
+        created_at,
+        updated_at,
+        project_id,
+        projects(name)
+      `)
+      .eq('user_id', user.id)
+      .eq('project_id', projectId)
+      .order('created_at', { ascending: false });
     
     if (error) {
-      console.error("Error fetching stories from Supabase:", error);
+      console.error("Error retrieving stories for project from Supabase:", error);
       throw error;
     }
     
+    // If no stories found, return an empty array
     if (!data || data.length === 0) {
-      const message = projectId 
-        ? `No stories found for project ${projectId}`
-        : "No stories found";
-      console.log(message);
+      console.log("No stories found for project:", projectId);
       return [];
     }
     
-    // Map Supabase data to UserStory format
-    const stories = data.map(item => {
-      const acceptanceCriteria = parseAcceptanceCriteria(item.acceptance_criteria);
-      console.log(`Project story ${item.id} has ${acceptanceCriteria.length} acceptance criteria`);
+    // Use the common function to transform the data
+    return data.map(story => {
+      // Parse the acceptance criteria from JSON string to array, handling fallbacks
+      let acceptanceCriteria: string[] = [];
+      
+      if (story.acceptance_criteria) {
+        try {
+          // Try to parse the JSON string
+          acceptanceCriteria = JSON.parse(story.acceptance_criteria);
+          // Ensure it's an array
+          if (!Array.isArray(acceptanceCriteria)) {
+            acceptanceCriteria = [];
+          }
+        } catch (e) {
+          console.error("Error parsing acceptance criteria:", e);
+          acceptanceCriteria = [];
+        }
+      }
+      
+      // Use project name from the joined projects table
+      const projectName = story.projects ? story.projects.name : undefined;
       
       return {
-        id: item.id,
-        role: item.persona,
-        goal: item.goal,
-        benefit: item.benefit,
-        priority: determinePriority(item.description || ""), // Use helper function
-        // Parse acceptance criteria from the stored JSON string
+        id: story.id,
+        storyText: story.title,
+        role: story.persona,
+        goal: story.goal,
+        benefit: story.benefit,
+        additionalNotes: story.description,
         acceptanceCriteria: acceptanceCriteria,
-        additionalNotes: item.description,
-        projectId: item.project_id,
-        projectName: item.projects?.name,
-        storyText: `As a ${item.persona}, I want to ${item.goal}, so that ${item.benefit}.`,
-        createdAt: new Date(item.created_at),
-        userId: item.user_id
+        createdAt: new Date(story.created_at),
+        projectId: story.project_id,
+        projectName: projectName,
+        priority: "Medium" // Default priority since it's not stored
       };
     });
-    
-    console.log(`Found ${stories.length} stories for ${projectId ? 'project ' + projectId : 'all projects'}`);
-    
-    return stories;
   } catch (error) {
-    console.error("Error in getStoriesByProject:", error);
+    console.error("Error retrieving stories for project:", error);
     throw error;
   }
 };

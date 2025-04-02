@@ -1,150 +1,116 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { UserStory } from "@/utils/story";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { FileEdit, CheckCircle2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { 
-  Trash, 
-  Edit,
-  MoreVertical,
-  FileText,
-  Download,
-  FileSpreadsheet,
-  Eye
-} from "lucide-react";
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-import { exportSingleStoryToExcel } from "@/utils/story/exportService";
-import { exportStoryToPdf } from "@/utils/story/exportPdfService";
 
 interface StoryCardProps {
   story: UserStory;
+  onClick: (story: UserStory) => void;
   onEdit: (story: UserStory) => void;
-  onDelete: (storyId: string) => void;
-  onView?: (story: UserStory) => void;
 }
 
-const StoryCard: React.FC<StoryCardProps> = ({ 
-  story, 
-  onEdit, 
-  onDelete,
-  onView 
+const StoryCard: React.FC<StoryCardProps> = ({
+  story,
+  onClick,
+  onEdit,
 }) => {
-  const priorityColors: Record<string, string> = {
-    "High": "bg-red-100 text-red-800",
-    "Medium": "bg-yellow-100 text-yellow-800",
-    "Low": "bg-green-100 text-green-800"
+  // Format date to a readable format
+  const formattedDate = new Date(story.createdAt).toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+  
+  // Handle priority color
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'High':
+        return 'text-red-500';
+      case 'Medium':
+        return 'text-yellow-500';
+      case 'Low':
+        return 'text-green-500';
+      default:
+        return 'text-gray-500';
+    }
   };
   
-  // Log the story data including acceptance criteria
-  console.log("Rendering StoryCard with story:", story.id);
-  console.log("Story acceptance criteria:", story.acceptanceCriteria);
+  // Ensure acceptance criteria is an array
+  const acceptanceCriteria = story.acceptanceCriteria && Array.isArray(story.acceptanceCriteria) 
+    ? story.acceptanceCriteria 
+    : [];
   
-  const handleExportToPdf = () => {
-    exportStoryToPdf(story);
+  const acceptanceCriteriaCount = acceptanceCriteria.length;
+  
+  // Truncate text if it's too long
+  const truncate = (text: string, maxLength: number) => {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
   };
-  
-  const handleExportToCsv = () => {
-    exportSingleStoryToExcel(story);
-  };
-  
+
   return (
-    <Card className="shadow-sm hover:shadow-md transition-shadow">
-      <CardContent className="pt-6">
-        <div className="flex justify-between items-start mb-4">
-          <Badge className={priorityColors[story.priority] || "bg-blue-100 text-blue-800"}>
-            {story.priority} Priority
+    <Card 
+      className="relative h-full cursor-pointer hover:shadow-md transition-shadow"
+      onClick={(e) => {
+        e.preventDefault();
+        onClick(story);
+      }}
+    >
+      <CardHeader className="pb-2">
+        <div className="flex justify-between items-start">
+          <CardTitle className="text-base font-medium mr-10">
+            {truncate(story.storyText, 120)}
+          </CardTitle>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute top-2 right-2 p-1 h-auto"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(story);
+            }}
+          >
+            <FileEdit className="h-4 w-4" />
+            <span className="sr-only">Edit</span>
+          </Button>
+        </div>
+      </CardHeader>
+      
+      <CardContent>
+        <div className="flex items-center gap-2 mb-2 flex-wrap">
+          <Badge variant="outline" className={`text-xs font-normal ${getPriorityColor(story.priority)}`}>
+            {story.priority || 'Medium'}
           </Badge>
           
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreVertical size={16} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onEdit(story)}>
-                <Edit className="mr-2 h-4 w-4" />
-                <span>Edit</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onDelete(story.id)}>
-                <Trash className="mr-2 h-4 w-4" />
-                <span>Delete</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleExportToPdf}>
-                <FileText className="mr-2 h-4 w-4" />
-                <span>Export as PDF</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleExportToCsv}>
-                <FileSpreadsheet className="mr-2 h-4 w-4" />
-                <span>Export as CSV</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        
-        <p className="text-sm mb-3">
-          <span className="font-semibold">{story.projectName}</span>
-        </p>
-        
-        <p className="mb-4">{story.storyText}</p>
-        
-        {story.acceptanceCriteria && story.acceptanceCriteria.length > 0 && (
-          <div className="mt-2">
-            <h4 className="text-sm font-medium mb-1">Acceptance Criteria:</h4>
-            <ul className="text-sm text-muted-foreground list-disc list-inside">
-              {story.acceptanceCriteria.slice(0, 2).map((criteria, index) => (
-                <li key={index} className="truncate">{criteria}</li>
-              ))}
-              {story.acceptanceCriteria.length > 2 && (
-                <li className="text-primary">+{story.acceptanceCriteria.length - 2} more</li>
-              )}
-            </ul>
-          </div>
-        )}
-      </CardContent>
-      
-      <CardFooter className="flex justify-between pt-2 pb-4">
-        <div className="text-xs text-muted-foreground">
-          Created {new Date(story.createdAt).toLocaleDateString()}
-        </div>
-        
-        <div className="flex gap-2">
-          {onView && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onView(story)}
-              className="h-8 px-2"
-            >
-              <Eye size={14} />
-            </Button>
+          {story.projectName && (
+            <Badge className="bg-primary/10 text-primary hover:bg-primary/20 text-xs font-normal">
+              {story.projectName}
+            </Badge>
           )}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onDelete(story.id)}
-            className="h-8 px-2"
-          >
-            <Trash size={14} />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onEdit(story)}
-            className="h-8 px-2"
-          >
-            <Edit size={14} />
-          </Button>
         </div>
-      </CardFooter>
+        
+        <div className="text-xs text-muted-foreground mb-3">
+          <span>{formattedDate}</span>
+        </div>
+        
+        <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+          {acceptanceCriteriaCount > 0 ? (
+            <div className="flex items-center gap-1 text-green-500">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              <span>{acceptanceCriteriaCount} acceptance criteria</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1 text-amber-500">
+              <AlertCircle className="h-3.5 w-3.5" />
+              <span>No acceptance criteria</span>
+            </div>
+          )}
+        </div>
+      </CardContent>
     </Card>
   );
 };

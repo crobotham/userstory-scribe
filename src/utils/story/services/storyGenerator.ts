@@ -60,6 +60,9 @@ export const generateUserStory = async (inputs: UserStoryInputs): Promise<UserSt
     userId: user.id
   };
   
+  // Ensure acceptance criteria is properly formatted as a JSON string
+  const acceptanceCriteriaJson = JSON.stringify(story.acceptanceCriteria || []);
+  
   // Save to Supabase
   try {
     console.log("Saving story to Supabase with data:", {
@@ -70,7 +73,8 @@ export const generateUserStory = async (inputs: UserStoryInputs): Promise<UserSt
       description: story.additionalNotes || '',
       persona: story.role,
       goal: story.goal,
-      benefit: story.benefit
+      benefit: story.benefit,
+      acceptance_criteria: acceptanceCriteriaJson
     });
     
     const { data, error } = await supabase.from('user_stories').insert({
@@ -81,7 +85,8 @@ export const generateUserStory = async (inputs: UserStoryInputs): Promise<UserSt
       description: story.additionalNotes || '',
       persona: story.role,
       goal: story.goal,
-      benefit: story.benefit
+      benefit: story.benefit,
+      acceptance_criteria: acceptanceCriteriaJson
     }).select();
     
     if (error) {
