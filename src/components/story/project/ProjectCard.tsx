@@ -3,8 +3,7 @@ import React from "react";
 import { Project } from "@/utils/story";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, BookOpen } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Edit, Trash2 } from "lucide-react";
 
 interface ProjectCardProps {
   project: Project;
@@ -17,16 +16,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   onEdit,
   onDelete,
 }) => {
-  const navigate = useNavigate();
-  
-  const handleViewStories = () => {
-    // Navigate to stories tab and select this project
-    const event = new CustomEvent('switchToDashboardTab', {
-      detail: { tab: 'stories', projectId: project.id }
-    });
-    window.dispatchEvent(event);
-  };
-
   return (
     <Card className="h-full">
       <CardHeader className="pb-3">
@@ -59,16 +48,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         ) : (
           <p className="text-muted-foreground text-sm italic mb-4">No description</p>
         )}
-        
-        <Button 
-          variant="secondary" 
-          size="sm" 
-          className="w-full mt-2"
-          onClick={handleViewStories}
-        >
-          <BookOpen size={16} className="mr-2" />
-          View Stories
-        </Button>
       </CardContent>
     </Card>
   );

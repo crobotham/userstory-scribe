@@ -8,7 +8,7 @@ import {
   createProject
 } from "@/utils/story";
 import { Button } from "@/components/ui/button";
-import { Settings } from "lucide-react";
+import { Settings, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import NewProjectDialog from "./NewProjectDialog";
 import DeleteConfirmationDialog from "./DeleteConfirmationDialog";
@@ -62,13 +62,6 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ onProjectsChanged
         title: "Project created",
         description: `Project "${name}" has been created successfully.`,
       });
-      
-      // Switch to stories tab and select the new project
-      const event = new CustomEvent('switchToDashboardTab', {
-        detail: { tab: 'stories', projectId: newProject.id }
-      });
-      window.dispatchEvent(event);
-      
       return newProject;
     } catch (error) {
       console.error("Error creating project:", error);
@@ -130,7 +123,7 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ onProjectsChanged
           onClick={() => setIsNewProjectDialogOpen(true)}
           className="flex items-center gap-2"
         >
-          <Settings size={16} />
+          <Plus size={16} />
           <span>Create New Project</span>
         </Button>
       </div>
