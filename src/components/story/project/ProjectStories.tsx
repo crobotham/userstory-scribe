@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Project, UserStory } from "@/utils/story";
 import { useNavigate } from "react-router-dom";
@@ -22,6 +21,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { deleteStoryFromLocalStorage } from "@/utils/story/services/storyDelete";
+import DeleteConfirmationDialog from "../DeleteConfirmationDialog";
 
 interface ProjectStoriesProps {
   project: Project;
@@ -83,14 +83,12 @@ const ProjectStories: React.FC<ProjectStoriesProps> = ({
         variant: "destructive",
       });
     } finally {
-      // Ensure we reset all state related to delete operation
       setIsDeleteDialogOpen(false);
       setStoryToDelete(null);
-      setIsDetailViewOpen(false); // Close the detail view as well
+      setIsDetailViewOpen(false);
     }
   };
 
-  // Handler for canceling delete operation
   const handleCancelDelete = () => {
     setIsDeleteDialogOpen(false);
     setStoryToDelete(null);
@@ -138,7 +136,6 @@ const ProjectStories: React.FC<ProjectStoriesProps> = ({
     });
   };
 
-  // Close detail view and ensure all modals are properly closed
   const handleCloseDetailView = () => {
     setIsDetailViewOpen(false);
     setSelectedStory(null);
