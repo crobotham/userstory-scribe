@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useToast } from "@/hooks/use-toast";
 import { deleteStoryFromLocalStorage } from "@/utils/story/services/storyDelete";
@@ -32,6 +33,8 @@ const DeleteStoryHandler: React.FC<DeleteStoryHandlerProps> = ({
         title: "Story deleted",
         description: "Your user story has been deleted successfully.",
       });
+      // Close detail view after successful deletion
+      setIsDetailViewOpen(false);
     } catch (error) {
       console.error("Error deleting story:", error);
       toast({
@@ -42,14 +45,13 @@ const DeleteStoryHandler: React.FC<DeleteStoryHandlerProps> = ({
     } finally {
       setIsDeleteDialogOpen(false);
       setStoryToDelete(null);
-      setIsDetailViewOpen(false);
     }
   };
 
   const handleCancelDelete = () => {
     setIsDeleteDialogOpen(false);
     setStoryToDelete(null);
-    // Keep detail view open if user cancels deletion
+    // Do NOT modify detail view state when canceling deletion
   };
 
   return (
