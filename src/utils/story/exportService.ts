@@ -9,18 +9,28 @@ export const exportStoriesToExcel = (stories: UserStory[]): void => {
     'Priority', 'Acceptance Criteria', 'Additional Notes', 'Project', 'Created At'
   ];
   
-  const data = stories.map(story => [
-    story.id,
-    story.storyText,
-    story.role,
-    story.goal,
-    story.benefit,
-    story.priority,
-    story.acceptanceCriteria.join('\n'),
-    story.additionalNotes || '',
-    story.projectName || 'No Project',
-    new Date(story.createdAt).toLocaleString()
-  ]);
+  const data = stories.map(story => {
+    // Ensure acceptance criteria is properly formatted with proper newlines
+    let acceptanceCriteriaText = '';
+    if (story.acceptanceCriteria && story.acceptanceCriteria.length > 0) {
+      acceptanceCriteriaText = story.acceptanceCriteria.join('\n');
+    } else {
+      acceptanceCriteriaText = 'No acceptance criteria specified';
+    }
+    
+    return [
+      story.id,
+      story.storyText,
+      story.role,
+      story.goal,
+      story.benefit,
+      story.priority,
+      acceptanceCriteriaText,
+      story.additionalNotes || '',
+      story.projectName || 'No Project',
+      new Date(story.createdAt).toLocaleString()
+    ];
+  });
   
   // Create CSV content
   let csvContent = headers.join(',') + '\n';

@@ -32,10 +32,15 @@ export const exportStoryToPdf = (story: UserStory): void => {
   doc.setFontSize(10);
   
   let yPosition = 85;
-  story.acceptanceCriteria.forEach((criterion, index) => {
-    doc.text(`${index + 1}. ${criterion}`, 25, yPosition);
+  if (story.acceptanceCriteria && story.acceptanceCriteria.length > 0) {
+    story.acceptanceCriteria.forEach((criterion, index) => {
+      doc.text(`${index + 1}. ${criterion}`, 25, yPosition);
+      yPosition += 10;
+    });
+  } else {
+    doc.text("No acceptance criteria specified", 25, yPosition);
     yPosition += 10;
-  });
+  }
   
   // Add additional notes if available
   if (story.additionalNotes) {
@@ -87,17 +92,22 @@ export const exportStoriesToPdf = (stories: UserStory[], projectName?: string): 
     doc.text("Acceptance Criteria:", 25, yPosition);
     yPosition += 7;
     
-    story.acceptanceCriteria.forEach((criterion, index) => {
-      doc.text(`- ${criterion}`, 30, yPosition);
+    if (story.acceptanceCriteria && story.acceptanceCriteria.length > 0) {
+      story.acceptanceCriteria.forEach((criterion, index) => {
+        doc.text(`- ${criterion}`, 30, yPosition);
+        yPosition += 7;
+        
+        // Check if we need a new page
+        if (yPosition > 250) {
+          doc.addPage();
+          pageCount++;
+          yPosition = 20;
+        }
+      });
+    } else {
+      doc.text("No acceptance criteria specified", 30, yPosition);
       yPosition += 7;
-      
-      // Check if we need a new page
-      if (yPosition > 250) {
-        doc.addPage();
-        pageCount++;
-        yPosition = 20;
-      }
-    });
+    }
     
     // Add separator
     yPosition += 10;
