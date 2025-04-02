@@ -10,40 +10,38 @@ export const useAuthState = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log("useAuthState: Initializing auth state");
     let isMounted = true;
-    let authStateUnsubscribe: (() => void) | undefined;
-
     const initializeAuth = async () => {
       try {
-        // First set up auth state change listener
+        // Set up auth state change listener first
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-          (event, currentSession) => {
-            console.log("Auth state changed, event:", event);
+          async (_event, session) => {
+            console.log("Auth state changed, event:", _event);
             if (isMounted) {
-              // Update state synchronously to prevent React update issues
-              setSession(currentSession);
-              setUser(currentSession?.user ?? null);
-              
-              // Only set loading to false after session is retrieved, 
-              // but don't set it for INITIAL_SESSION as we're handling that below
-              if (event !== 'INITIAL_SESSION') {
-                setLoading(false);
-              }
+              setSession(session);
+              setUser(session?.user ?? null);
+              setLoading(false);
             }
           }
         );
         
-        authStateUnsubscribe = () => subscription.unsubscribe();
-        
         // Then check for existing session
-        const existingSession = await getSession();
+        const { session, user } = await getSession();
         if (isMounted) {
-          console.log("useAuthState: Retrieved existing session:", !!existingSession.session);
-          setSession(existingSession.session);
-          setUser(existingSession.user);
+          setSession(session);
+          setUser(user);
           setLoading(false);
         }
+        
+        // Ensure loading state is cleared even if there's no auth state change event
+        setTimeout(() => {
+          if (isMounted && loading) {
+            console.log("Forcing loading state to complete after timeout");
+            setLoading(false);
+          }
+        }, 3000); // 3 second safety timeout
+        
+        return () => subscription.unsubscribe();
       } catch (error) {
         console.error("Error initializing auth:", error);
         if (isMounted) {
@@ -52,14 +50,15 @@ export const useAuthState = () => {
       }
     };
 
-    initializeAuth();
+    const cleanup = initializeAuth();
     
     return () => {
-      console.log("useAuthState: Cleaning up");
       isMounted = false;
-      if (typeof authStateUnsubscribe === 'function') {
-        authStateUnsubscribe();
-      }
+      cleanup.then(unsubscribe => {
+        if (typeof unsubscribe === 'function') {
+          unsubscribe();
+        }
+      });
     };
   }, []);
 

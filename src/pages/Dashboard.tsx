@@ -7,16 +7,16 @@ import QuestionFlow from "@/components/QuestionFlow";
 import FooterSection from "@/components/home/FooterSection";
 import NewsBanner from "@/components/dashboard/NewsBanner";
 import { Loader2 } from "lucide-react";
+import { ToastProvider } from "@/contexts/ToastContext";
+import { Toaster } from "@/components/ui/toaster";
 
 const Dashboard = () => {
-  console.log("Dashboard component rendering");
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   // Redirect unauthenticated users to home page
   useEffect(() => {
-    console.log("Dashboard auth check:", { user, loading });
     if (!loading && !user) {
       navigate("/");
     }
@@ -49,30 +49,33 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50">
-      <Header isDashboard={true} />
-      
-      <main className="flex-1">
-        <NewsBanner />
+    <ToastProvider>
+      <div className="min-h-screen flex flex-col bg-slate-50">
+        <Header isDashboard={true} />
         
-        <div className="py-8 px-4 max-w-6xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold tracking-tight mb-2">
-              User Story Generator
-            </h1>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Create comprehensive user stories to guide your development process
-            </p>
-          </div>
+        <main className="flex-1">
+          <NewsBanner />
           
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <QuestionFlow />
+          <div className="py-8 px-4 max-w-6xl mx-auto">
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold tracking-tight mb-2">
+                User Story Generator
+              </h1>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Create comprehensive user stories to guide your development process
+              </p>
+            </div>
+            
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <QuestionFlow />
+            </div>
           </div>
-        </div>
-      </main>
-      
-      <FooterSection />
-    </div>
+        </main>
+        
+        <FooterSection />
+        <Toaster />
+      </div>
+    </ToastProvider>
   );
 };
 

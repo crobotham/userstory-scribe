@@ -6,24 +6,24 @@ import Header from "@/components/Header";
 import StoryHistory from "@/components/StoryHistory";
 import FooterSection from "@/components/home/FooterSection";
 import { Loader2 } from "lucide-react";
+import { Toaster } from "@/components/ui/toaster";
+import { ToastProvider } from "@/contexts/ToastContext";
 
 const StoryManagement = () => {
-  console.log("StoryManagement component rendering");
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [isPageLoading, setIsPageLoading] = useState(true);
 
   // Redirect unauthenticated users to home page
   useEffect(() => {
-    console.log("StoryManagement auth check:", { user, loading, isPageLoading });
     if (!loading) {
       if (!user) {
         navigate("/");
       } else {
-        // Give a slight delay to ensure components mount properly
+        // Give a larger delay to ensure components mount properly
         setTimeout(() => {
           setIsPageLoading(false);
-        }, 500);
+        }, 1500); // Increased from 1000ms to 1500ms
       }
     }
   }, [user, loading, navigate]);
@@ -43,6 +43,11 @@ const StoryManagement = () => {
     }
   }, []);
 
+  // Add debugging logs
+  useEffect(() => {
+    console.log("StoryManagement - Auth state:", { user, loading, isPageLoading });
+  }, [user, loading, isPageLoading]);
+
   if (loading || isPageLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-slate-50">
@@ -55,28 +60,31 @@ const StoryManagement = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50">
-      <Header isDashboard={true} />
-      
-      <main className="flex-1">
-        <div className="py-8 px-4 max-w-6xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold tracking-tight mb-2">
-              Story Management
-            </h1>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              View, edit, and organize your user stories and projects
-            </p>
+    <ToastProvider>
+      <div className="min-h-screen flex flex-col bg-slate-50">
+        <Header isDashboard={true} />
+        
+        <main className="flex-1">
+          <div className="py-8 px-4 max-w-6xl mx-auto">
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold tracking-tight mb-2">
+                Story Management
+              </h1>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                View, edit, and organize your user stories and projects
+              </p>
+            </div>
+            
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <StoryHistory />
+            </div>
           </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <StoryHistory />
-          </div>
-        </div>
-      </main>
-      
-      <FooterSection />
-    </div>
+        </main>
+        
+        <FooterSection />
+        <Toaster />
+      </div>
+    </ToastProvider>
   );
 };
 
