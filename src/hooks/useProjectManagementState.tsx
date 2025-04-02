@@ -4,20 +4,16 @@ import {
   Project,
   UserStory,
   getProjectsFromLocalStorage,
-  deleteProjectFromLocalStorage,
-  updateProjectInLocalStorage,
-  createProject,
   getStoriesByProject
 } from "@/utils/story";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useProjectCreate } from "./useProjectCreate";
+import { useProjectUpdate } from "./useProjectUpdate";
+import { useProjectDelete } from "./useProjectDelete";
 
 export const useProjectManagementState = (onProjectsChanged: () => void) => {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
-  const [projectToEdit, setProjectToEdit] = useState<Project | null>(null);
-  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [projectStories, setProjectStories] = useState<UserStory[]>([]);
@@ -78,11 +74,9 @@ export const useProjectManagementState = (onProjectsChanged: () => void) => {
       if (!user) return;
 
       const counts: Record<string, number> = {};
-      projects.forEach(project => {
-        counts[project.id] = 0;
-      });
-
+      
       for (const project of projects) {
+        counts[project.id] = 0;
         const { data, error } = await supabase
           .from('user_stories')
           .select('id')
@@ -133,23 +127,44 @@ export const useProjectManagementState = (onProjectsChanged: () => void) => {
     setProjectStories([]);
   };
   
+  // Initialize the specialized hooks
+  const projectCreate = useProjectCreate(loadProjects);
+  const projectUpdate = useProjectUpdate(loadProjects);
+  const projectDelete = useProjectDelete(loadProjects);
+  
   return {
+    // Project list state
     projects,
-    isNewProjectDialogOpen,
-    projectToEdit,
-    projectToDelete,
-    isDeleteDialogOpen,
     isLoading,
+    storyCounts,
+    
+    // Selected project state
     selectedProject,
     projectStories,
     isLoadingStories,
-    storyCounts,
-    setIsNewProjectDialogOpen,
-    setProjectToEdit,
-    setProjectToDelete,
-    setIsDeleteDialogOpen,
-    loadProjects,
+    
+    // Project creation state and handlers
+    isNewProjectDialogOpen: projectCreate.isCreateDialogOpen,
+    setIsNewProjectDialogOpen: projectCreate.setIsCreateDialogOpen,
+    handleCreateProject: projectCreate.handleCreateProject,
+    
+    // Project update state and handlers
+    projectToEdit: projectUpdate.projectToEdit,
+    setProjectToEdit: projectUpdate.setProjectToEdit,
+    handleUpdateProject: projectUpdate.handleUpdateProject,
+    
+    // Project delete state and handlers
+    projectToDelete: projectDelete.projectToDelete,
+    isDeleteDialogOpen: projectDelete.isDeleteDialogOpen,
+    setProjectToDelete: projectDelete.setProjectToDelete,
+    setIsDeleteDialogOpen: projectDelete.setIsDeleteDialogOpen,
+    handleDeleteProject: projectDelete.handleDeleteProject,
+    
+    // Project navigation
     handleProjectSelect,
-    handleBackToProjects
+    handleBackToProjects,
+    
+    // Data loading
+    loadProjects
   };
 };
