@@ -85,7 +85,7 @@ const App = () => {
             </Routes>
             {/* Place toasters at the app level to avoid duplicates */}
             <Toaster />
-            <Sonner />
+            <Sonner position="top-right" />
           </TooltipProvider>
         </AuthProvider>
       </BrowserRouter>

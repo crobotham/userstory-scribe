@@ -6,7 +6,6 @@ import Header from "@/components/Header";
 import StoryHistory from "@/components/StoryHistory";
 import FooterSection from "@/components/home/FooterSection";
 import { Loader2 } from "lucide-react";
-import { ToastProvider } from "@/contexts/ToastContext";
 
 const StoryManagement = () => {
   const { user, loading } = useAuth();
@@ -59,30 +58,28 @@ const StoryManagement = () => {
   }
 
   return (
-    <ToastProvider>
-      <div className="min-h-screen flex flex-col bg-slate-50">
-        <Header isDashboard={true} />
-        
-        <main className="flex-1">
-          <div className="py-8 px-4 max-w-6xl mx-auto">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold tracking-tight mb-2">
-                Story Management
-              </h1>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                View, edit, and organize your user stories and projects
-              </p>
-            </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <StoryHistory />
-            </div>
+    <div className="min-h-screen flex flex-col bg-slate-50">
+      <Header isDashboard={true} />
+      
+      <main className="flex-1">
+        <div className="py-8 px-4 max-w-6xl mx-auto">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold tracking-tight mb-2">
+              Story Management
+            </h1>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              View, edit, and organize your user stories and projects
+            </p>
           </div>
-        </main>
-        
-        <FooterSection />
-      </div>
-    </ToastProvider>
+          
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <StoryHistory />
+          </div>
+        </div>
+      </main>
+      
+      <FooterSection />
+    </div>
   );
 };
 

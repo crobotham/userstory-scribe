@@ -9,10 +9,15 @@ export const useAuthState = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const isMounted = useRef(true);
+  const initialized = useRef(false);
 
   useEffect(() => {
     // Set isMounted to true when the component mounts
     isMounted.current = true;
+    
+    // Prevent duplicate initialization
+    if (initialized.current) return;
+    initialized.current = true;
     
     const initializeAuth = async () => {
       try {
@@ -20,21 +25,24 @@ export const useAuthState = () => {
         
         // Set up auth state change listener first
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-          async (_event, session) => {
+          (_event, newSession) => {
             console.log("Auth state changed, event:", _event);
             if (isMounted.current) {
-              setSession(session);
-              setUser(session?.user ?? null);
-              setLoading(false);
+              setSession(newSession);
+              setUser(newSession?.user ?? null);
+              // Only update loading after initial session check
+              if (loading) {
+                setLoading(false);
+              }
             }
           }
         );
         
         // Then check for existing session
-        const { session, user } = await getSession();
+        const { session: initialSession, user: initialUser } = await getSession();
         if (isMounted.current) {
-          setSession(session);
-          setUser(user);
+          setSession(initialSession);
+          setUser(initialUser);
           setLoading(false);
         }
         

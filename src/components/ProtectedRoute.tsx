@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Navigate, useLocation } from "react-router-dom";
 import { Spinner } from "@/components/ui/spinner";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface ProtectedRouteProps {
@@ -22,6 +22,8 @@ const ProtectedRoute = ({
   const { toast } = useToast();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isCheckingAdmin, setIsCheckingAdmin] = useState(adminOnly);
+  const [shouldRedirect, setShouldRedirect] = useState(false);
+  const toastShown = useRef(false);
   
   // Check admin status if needed
   useEffect(() => {
@@ -52,6 +54,44 @@ const ProtectedRoute = ({
     }
   }, [user, adminOnly]);
   
+  // Handle auth redirects separately from render
+  useEffect(() => {
+    // Allow access to public paths without authentication
+    const isPublicPath = publicPaths.some(path => 
+      location.pathname === path || location.pathname.startsWith('/blog/')
+    );
+    
+    if (isPublicPath && !adminOnly) {
+      setShouldRedirect(false);
+      return;
+    }
+    
+    // Handle authentication redirects
+    if (!loading && !user) {
+      if (!toastShown.current) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in to access this page",
+        });
+        toastShown.current = true;
+      }
+      setShouldRedirect(true);
+    }
+    
+    // Handle admin access redirects
+    if (!loading && user && adminOnly && !isCheckingAdmin && !isAdmin) {
+      if (!toastShown.current) {
+        toast({
+          title: "Access Denied",
+          description: "You don't have permission to access this page",
+          variant: "destructive",
+        });
+        toastShown.current = true;
+      }
+      setShouldRedirect(true);
+    }
+  }, [user, loading, adminOnly, isAdmin, isCheckingAdmin, location.pathname, toast]);
+  
   // Allow access to public paths without authentication
   const isPublicPath = publicPaths.some(path => 
     location.pathname === path || location.pathname.startsWith('/blog/')
@@ -73,23 +113,15 @@ const ProtectedRoute = ({
     );
   }
 
-  // Redirect to login if not authenticated
-  if (!user) {
-    toast({
-      title: "Authentication Required",
-      description: "Please log in to access this page",
-    });
-    return <Navigate to="/auth" state={{ from: location }} replace />;
-  }
-  
-  // Redirect if admin access is required but user is not admin
-  if (adminOnly && !isAdmin) {
-    toast({
-      title: "Access Denied",
-      description: "You don't have permission to access this page",
-      variant: "destructive",
-    });
-    return <Navigate to="/blog" replace />;
+  // Handle redirects
+  if (shouldRedirect) {
+    if (!user) {
+      return <Navigate to="/auth" state={{ from: location }} replace />;
+    }
+    
+    if (adminOnly && !isAdmin) {
+      return <Navigate to="/blog" replace />;
+    }
   }
 
   // Render the children if authenticated and has proper permissions

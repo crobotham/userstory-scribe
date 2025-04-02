@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useCallback } from "react";
+import React, { createContext, useContext } from "react";
 import { useToast as useHookToast } from "@/hooks/use-toast";
 
 // Create a context for toast functionality
