@@ -34,6 +34,10 @@ const StoryDetailView: React.FC<StoryDetailViewProps> = ({
     "Low": "bg-green-100 text-green-800"
   };
   
+  // Log the story data including acceptance criteria
+  console.log("Rendering StoryDetailView with story:", story);
+  console.log("Acceptance criteria:", story.acceptanceCriteria);
+  
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
@@ -76,7 +80,7 @@ const StoryDetailView: React.FC<StoryDetailViewProps> = ({
             </div>
           </div>
           
-          {story.acceptanceCriteria.length > 0 && (
+          {story.acceptanceCriteria && story.acceptanceCriteria.length > 0 && (
             <div>
               <h4 className="text-sm font-medium mb-1">Acceptance Criteria:</h4>
               <ul className="text-sm list-disc list-inside">

@@ -42,6 +42,10 @@ const StoryCard: React.FC<StoryCardProps> = ({
     "Low": "bg-green-100 text-green-800"
   };
   
+  // Log the story data including acceptance criteria
+  console.log("Rendering StoryCard with story:", story.id);
+  console.log("Story acceptance criteria:", story.acceptanceCriteria);
+  
   const handleExportToPdf = () => {
     exportStoryToPdf(story);
   };
@@ -92,7 +96,7 @@ const StoryCard: React.FC<StoryCardProps> = ({
         
         <p className="mb-4">{story.storyText}</p>
         
-        {story.acceptanceCriteria.length > 0 && (
+        {story.acceptanceCriteria && story.acceptanceCriteria.length > 0 && (
           <div className="mt-2">
             <h4 className="text-sm font-medium mb-1">Acceptance Criteria:</h4>
             <ul className="text-sm text-muted-foreground list-disc list-inside">

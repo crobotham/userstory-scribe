@@ -12,6 +12,8 @@ export const saveStoryToLocalStorage = async (story: UserStory): Promise<void> =
   }
   
   try {
+    console.log("Saving story to Supabase with acceptance criteria:", story.acceptanceCriteria);
+    
     const { error } = await supabase.from('user_stories').insert({
       id: story.id,
       user_id: user.id,
@@ -21,8 +23,8 @@ export const saveStoryToLocalStorage = async (story: UserStory): Promise<void> =
       persona: story.role,
       goal: story.goal,
       benefit: story.benefit,
-      // Convert acceptance criteria to a JSON string to save to the text column
-      acceptance_criteria: story.acceptanceCriteria ? JSON.stringify(story.acceptanceCriteria) : null
+      // Convert acceptance criteria to a JSON string
+      acceptance_criteria: JSON.stringify(story.acceptanceCriteria)
     });
     
     if (error) {
@@ -40,6 +42,7 @@ export const saveStoryToLocalStorage = async (story: UserStory): Promise<void> =
 // Update similar changes for updateStoryInLocalStorage
 export const updateStoryInLocalStorage = async (updatedStory: UserStory): Promise<void> => {
   console.log("Starting story update process for ID:", updatedStory.id);
+  console.log("Acceptance criteria to save:", updatedStory.acceptanceCriteria);
   
   // Get current user
   const { data: { user } } = await supabase.auth.getUser();
@@ -58,7 +61,7 @@ export const updateStoryInLocalStorage = async (updatedStory: UserStory): Promis
       goal: updatedStory.goal || '',
       benefit: updatedStory.benefit || '',
       // Convert acceptance criteria to a JSON string
-      acceptance_criteria: updatedStory.acceptanceCriteria ? JSON.stringify(updatedStory.acceptanceCriteria) : null,
+      acceptance_criteria: JSON.stringify(updatedStory.acceptanceCriteria),
       updated_at: new Date().toISOString()
     };
 

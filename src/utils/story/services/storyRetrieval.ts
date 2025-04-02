@@ -7,9 +7,11 @@ const parseAcceptanceCriteria = (criteria: string | null): string[] => {
   if (!criteria) return [];
   try {
     // Try parsing as JSON array
+    console.log("Parsing acceptance criteria:", criteria);
     const parsed = JSON.parse(criteria);
     return Array.isArray(parsed) ? parsed : [];
-  } catch {
+  } catch (error) {
+    console.error("Error parsing acceptance criteria:", error);
     // If parsing fails, return an empty array
     return [];
   }
@@ -45,21 +47,28 @@ export const getStoriesFromLocalStorage = async (): Promise<UserStory[]> => {
     
     console.log("Found stories in Supabase:", data.length);
     // Map Supabase data to UserStory format
-    return data.map(item => ({
-      id: item.id,
-      role: item.persona,
-      goal: item.goal,
-      benefit: item.benefit,
-      priority: determinePriority(item.description || ""), // Convert string to proper enum value
-      // Parse acceptance criteria from the stored JSON string
-      acceptanceCriteria: parseAcceptanceCriteria(item.acceptance_criteria || null),
-      additionalNotes: item.description,
-      projectId: item.project_id,
-      projectName: item.projects?.name,
-      storyText: `As a ${item.persona}, I want to ${item.goal}, so that ${item.benefit}.`,
-      createdAt: new Date(item.created_at),
-      userId: item.user_id
-    }));
+    const stories = data.map(item => {
+      const acceptanceCriteria = parseAcceptanceCriteria(item.acceptance_criteria);
+      console.log(`Story ${item.id} has ${acceptanceCriteria.length} acceptance criteria`);
+      
+      return {
+        id: item.id,
+        role: item.persona,
+        goal: item.goal,
+        benefit: item.benefit,
+        priority: determinePriority(item.description || ""), // Convert string to proper enum value
+        // Parse acceptance criteria from the stored JSON string
+        acceptanceCriteria: acceptanceCriteria,
+        additionalNotes: item.description,
+        projectId: item.project_id,
+        projectName: item.projects?.name,
+        storyText: `As a ${item.persona}, I want to ${item.goal}, so that ${item.benefit}.`,
+        createdAt: new Date(item.created_at),
+        userId: item.user_id
+      };
+    });
+    
+    return stories;
   } catch (err) {
     console.error("Error fetching stories from Supabase:", err);
     throw err;
@@ -122,21 +131,26 @@ export const getStoriesByProject = async (projectId: string | null): Promise<Use
     }
     
     // Map Supabase data to UserStory format
-    const stories = data.map(item => ({
-      id: item.id,
-      role: item.persona,
-      goal: item.goal,
-      benefit: item.benefit,
-      priority: determinePriority(item.description || ""), // Use helper function
-      // Parse acceptance criteria from the stored JSON string
-      acceptanceCriteria: parseAcceptanceCriteria(item.acceptance_criteria || null),
-      additionalNotes: item.description,
-      projectId: item.project_id,
-      projectName: item.projects?.name,
-      storyText: `As a ${item.persona}, I want to ${item.goal}, so that ${item.benefit}.`,
-      createdAt: new Date(item.created_at),
-      userId: item.user_id
-    }));
+    const stories = data.map(item => {
+      const acceptanceCriteria = parseAcceptanceCriteria(item.acceptance_criteria);
+      console.log(`Project story ${item.id} has ${acceptanceCriteria.length} acceptance criteria`);
+      
+      return {
+        id: item.id,
+        role: item.persona,
+        goal: item.goal,
+        benefit: item.benefit,
+        priority: determinePriority(item.description || ""), // Use helper function
+        // Parse acceptance criteria from the stored JSON string
+        acceptanceCriteria: acceptanceCriteria,
+        additionalNotes: item.description,
+        projectId: item.project_id,
+        projectName: item.projects?.name,
+        storyText: `As a ${item.persona}, I want to ${item.goal}, so that ${item.benefit}.`,
+        createdAt: new Date(item.created_at),
+        userId: item.user_id
+      };
+    });
     
     console.log(`Found ${stories.length} stories for ${projectId ? 'project ' + projectId : 'all projects'}`);
     
