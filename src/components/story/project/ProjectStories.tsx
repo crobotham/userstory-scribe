@@ -1,11 +1,26 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Project, UserStory } from "@/utils/story";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, FileText, Plus } from "lucide-react";
+import { 
+  ChevronLeft, 
+  FileText, 
+  Plus, 
+  Download,
+  FileSpreadsheet
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import StoryCard from "../StoryCard";
 import { Loader2 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import { exportStoriesToExcel } from "@/utils/story/exportService";
+import { exportStoriesToPdf } from "@/utils/story/exportPdfService";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProjectStoriesProps {
   project: Project;
@@ -21,9 +36,44 @@ const ProjectStories: React.FC<ProjectStoriesProps> = ({
   onBackClick
 }) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleCreateStory = () => {
     navigate(`/dashboard?projectId=${project.id}`);
+  };
+
+  const handleExportToPdf = () => {
+    if (stories.length === 0) {
+      toast({
+        title: "No stories to export",
+        description: "Create some stories first before exporting.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    exportStoriesToPdf(stories, project.name);
+    toast({
+      title: "Export successful",
+      description: "Your stories have been exported to PDF",
+    });
+  };
+  
+  const handleExportToCsv = () => {
+    if (stories.length === 0) {
+      toast({
+        title: "No stories to export",
+        description: "Create some stories first before exporting.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    exportStoriesToExcel(stories);
+    toast({
+      title: "Export successful",
+      description: "Your stories have been exported to CSV",
+    });
   };
 
   return (
@@ -40,13 +90,35 @@ const ProjectStories: React.FC<ProjectStoriesProps> = ({
           </Button>
           <h2 className="text-2xl font-semibold tracking-tight">{project.name}</h2>
         </div>
-        <Button 
-          onClick={handleCreateStory}
-          className="flex items-center gap-2"
-        >
-          <Plus size={16} />
-          <span>Create New Story</span>
-        </Button>
+        <div className="flex items-center gap-2">
+          {stories.length > 0 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="flex items-center gap-2">
+                  <Download size={16} />
+                  <span>Export</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleExportToPdf}>
+                  <FileText className="mr-2 h-4 w-4" />
+                  <span>Export as PDF</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleExportToCsv}>
+                  <FileSpreadsheet className="mr-2 h-4 w-4" />
+                  <span>Export as CSV</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+          <Button 
+            onClick={handleCreateStory}
+            className="flex items-center gap-2"
+          >
+            <Plus size={16} />
+            <span>Create New Story</span>
+          </Button>
+        </div>
       </div>
 
       {project.description && (

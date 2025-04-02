@@ -1,7 +1,7 @@
 
 import { UserStory } from './types';
 
-// Export stories to Excel file
+// Export stories to Excel/CSV file
 export const exportStoriesToExcel = (stories: UserStory[]): void => {
   // Prepare data for Excel
   const headers = [
@@ -50,4 +50,9 @@ export const exportStoriesToExcel = (stories: UserStory[]): void => {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+};
+
+// Export a single story to CSV
+export const exportSingleStoryToExcel = (story: UserStory): void => {
+  exportStoriesToExcel([story]);
 };
