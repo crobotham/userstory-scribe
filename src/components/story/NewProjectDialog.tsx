@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 interface NewProjectDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreateProject: (name: string, description?: string) => void;
+  onCreateProject: (name: string, description?: string) => Promise<any>;
 }
 
 const NewProjectDialog: React.FC<NewProjectDialogProps> = ({
@@ -26,8 +26,20 @@ const NewProjectDialog: React.FC<NewProjectDialogProps> = ({
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Reset form when dialog opens/closes
+  useEffect(() => {
+    if (!isOpen) {
+      // Reset form state when dialog closes
+      setProjectName("");
+      setProjectDescription("");
+      setError("");
+      setIsSubmitting(false);
+    }
+  }, [isOpen]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!projectName.trim()) {
@@ -35,15 +47,26 @@ const NewProjectDialog: React.FC<NewProjectDialogProps> = ({
       return;
     }
     
-    onCreateProject(
-      projectName.trim(), 
-      projectDescription.trim() || undefined
-    );
+    setIsSubmitting(true);
     
-    // Reset form
-    setProjectName("");
-    setProjectDescription("");
-    setError("");
+    try {
+      await onCreateProject(
+        projectName.trim(), 
+        projectDescription.trim() || undefined
+      );
+      
+      // Reset form
+      setProjectName("");
+      setProjectDescription("");
+      setError("");
+      
+      // Close the dialog
+      onClose();
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -69,6 +92,7 @@ const NewProjectDialog: React.FC<NewProjectDialogProps> = ({
                 className={error ? "border-destructive" : ""}
                 placeholder="Enter project name"
                 autoFocus
+                disabled={isSubmitting}
               />
               {error && <p className="text-xs text-destructive">{error}</p>}
             </div>
@@ -83,15 +107,18 @@ const NewProjectDialog: React.FC<NewProjectDialogProps> = ({
                 onChange={(e) => setProjectDescription(e.target.value)}
                 placeholder="Brief description of the project"
                 rows={3}
+                disabled={isSubmitting}
               />
             </div>
           </div>
           
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button type="submit">Create Project</Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Creating..." : "Create Project"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
