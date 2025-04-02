@@ -52,7 +52,7 @@ export const getStoriesFromLocalStorage = async (): Promise<UserStory[]> => {
       benefit: item.benefit,
       priority: determinePriority(item.description || ""), // Convert string to proper enum value
       // Parse acceptance criteria from the stored JSON string
-      acceptanceCriteria: parseAcceptanceCriteria(item.acceptance_criteria),
+      acceptanceCriteria: parseAcceptanceCriteria(item.acceptance_criteria || null),
       additionalNotes: item.description,
       projectId: item.project_id,
       projectName: item.projects?.name,
@@ -129,7 +129,7 @@ export const getStoriesByProject = async (projectId: string | null): Promise<Use
       benefit: item.benefit,
       priority: determinePriority(item.description || ""), // Use helper function
       // Parse acceptance criteria from the stored JSON string
-      acceptanceCriteria: parseAcceptanceCriteria(item.acceptance_criteria),
+      acceptanceCriteria: parseAcceptanceCriteria(item.acceptance_criteria || null),
       additionalNotes: item.description,
       projectId: item.project_id,
       projectName: item.projects?.name,
