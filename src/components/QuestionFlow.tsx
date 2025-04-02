@@ -4,7 +4,11 @@ import { useQuestionFlow } from "@/hooks/useQuestionFlow";
 import ProjectListener from "./question-flow/ProjectListener";
 import TabsContainer from "./question-flow/TabsContainer";
 
-const QuestionFlow: React.FC = () => {
+interface QuestionFlowProps {
+  initialProjectId?: string | null;
+}
+
+const QuestionFlow: React.FC<QuestionFlowProps> = ({ initialProjectId }) => {
   const [activeTab, setActiveTab] = React.useState<string>("step-by-step");
   
   const {
@@ -30,6 +34,14 @@ const QuestionFlow: React.FC = () => {
   const handleStoriesGenerated = () => {
     window.dispatchEvent(new CustomEvent('storyCreated'));
   };
+  
+  // Set initial project ID if provided
+  useEffect(() => {
+    if (initialProjectId) {
+      console.log("Setting initial project ID in QuestionFlow:", initialProjectId);
+      setProjectFromId(initialProjectId);
+    }
+  }, [initialProjectId, setProjectFromId]);
   
   return (
     <div className="animate-fade-in">

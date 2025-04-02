@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
@@ -12,6 +12,7 @@ const Dashboard = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [projectId, setProjectId] = useState<string | null>(null);
 
   // Redirect unauthenticated users to home page
   useEffect(() => {
@@ -23,13 +24,15 @@ const Dashboard = () => {
   // Check URL parameters for project selection - run only once when component mounts
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
-    const projectId = searchParams.get('projectId');
+    const urlProjectId = searchParams.get('projectId');
     
-    if (projectId) {
-      console.log("Dashboard detected projectId in URL:", projectId);
+    if (urlProjectId) {
+      console.log("Dashboard detected projectId in URL:", urlProjectId);
+      setProjectId(urlProjectId);
+      
       // Dispatch an event that QuestionFlow listens for
       const event = new CustomEvent('projectSelected', {
-        detail: { projectId }
+        detail: { projectId: urlProjectId }
       });
       window.dispatchEvent(event);
     }
@@ -64,7 +67,7 @@ const Dashboard = () => {
           </div>
           
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <QuestionFlow />
+            <QuestionFlow initialProjectId={projectId} />
           </div>
         </div>
       </main>

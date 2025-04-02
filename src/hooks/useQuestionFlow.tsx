@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { useStoryGenerator } from "./useStoryGenerator";
 import { useStoryManagement } from "./useStoryManagement";
@@ -66,6 +67,7 @@ export const useQuestionFlow = () => {
   
   const handleReset = useCallback(() => {
     setCurrentStep(0);
+    // Preserve the project ID when resetting the form
     const projectId = inputs.projectId;
     setInputs({
       role: "",
@@ -74,7 +76,7 @@ export const useQuestionFlow = () => {
       priority: "Medium",
       acceptanceCriteria: [],
       additionalNotes: "",
-      projectId
+      projectId // Keep the project ID
     });
     resetStory();
   }, [resetStory, inputs.projectId]);

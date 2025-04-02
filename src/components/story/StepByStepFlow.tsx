@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import Question from "../question";
 import ProgressIndicator from "../ProgressIndicator";
@@ -119,7 +120,10 @@ const StepByStepFlow: React.FC<StepByStepFlowProps> = ({
   
   // If no projects exist, show project creation prompt
   if (projects.length === 0) {
-    return <CreateProjectPrompt onCreateProject={onCreateProject} />;
+    return <CreateProjectPrompt 
+      onCreateProject={onCreateProject} 
+      preselectedProjectId={inputs.projectId} 
+    />;
   }
   
   // First, we show the project selection step until a project is selected

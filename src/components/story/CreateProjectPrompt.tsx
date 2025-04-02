@@ -1,16 +1,35 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import NewProjectDialog from "./NewProjectDialog";
 import { useToast } from "@/contexts/ToastContext";
 
 interface CreateProjectPromptProps {
   onCreateProject: (name: string, description?: string) => Promise<any>;
+  preselectedProjectId?: string;
 }
 
-const CreateProjectPrompt: React.FC<CreateProjectPromptProps> = ({ onCreateProject }) => {
-  const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(true); // Auto-open the dialog
+const CreateProjectPrompt: React.FC<CreateProjectPromptProps> = ({ 
+  onCreateProject,
+  preselectedProjectId 
+}) => {
+  const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(!preselectedProjectId); // Only auto-open if no project ID
   const { toast } = useToast();
+  
+  useEffect(() => {
+    // If there's a preselected project, we should trigger a project changed event
+    if (preselectedProjectId) {
+      console.log("Using preselected project, triggering events:", preselectedProjectId);
+      // Force reload projects
+      window.dispatchEvent(new CustomEvent('projectChanged'));
+      
+      // Switch to the project's dashboard tab
+      const event = new CustomEvent('switchToDashboardTab', {
+        detail: { tab: 'stories', projectId: preselectedProjectId }
+      });
+      window.dispatchEvent(event);
+    }
+  }, [preselectedProjectId]);
   
   const handleCreateProject = async (name: string, description?: string) => {
     try {
