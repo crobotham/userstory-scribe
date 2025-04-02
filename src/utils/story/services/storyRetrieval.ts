@@ -1,3 +1,4 @@
+
 import { UserStory, StoredUserStory } from '../types';
 import { supabase } from "@/integrations/supabase/client";
 
@@ -37,7 +38,7 @@ export const getStoriesFromLocalStorage = async (): Promise<UserStory[]> => {
       goal: item.goal,
       benefit: item.benefit,
       priority: determinePriority(item.description || ""), // Convert string to proper enum value
-      acceptanceCriteria: item.acceptance_criteria || [], // Updated to use the new column
+      acceptanceCriteria: Array.isArray(item.acceptance_criteria) ? item.acceptance_criteria : [], // Ensure it's an array
       additionalNotes: item.description,
       projectId: item.project_id,
       projectName: item.projects?.name,
@@ -113,7 +114,7 @@ export const getStoriesByProject = async (projectId: string | null): Promise<Use
       goal: item.goal,
       benefit: item.benefit,
       priority: determinePriority(item.description || ""), // Use helper function
-      acceptanceCriteria: item.acceptance_criteria || [], // Updated to use the new column
+      acceptanceCriteria: Array.isArray(item.acceptance_criteria) ? item.acceptance_criteria : [], // Ensure it's an array
       additionalNotes: item.description,
       projectId: item.project_id,
       projectName: item.projects?.name,
