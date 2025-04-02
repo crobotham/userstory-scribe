@@ -112,17 +112,17 @@ export const useEditStoryForm = (
     try {
       console.log("Preparing to save story:", editedStory.id);
       
-      // Make sure the story text is correctly formed before saving
+      // Make sure the story text is correctly formed
       const storyText = `As a ${editedStory.role}, I want to ${editedStory.goal}, so that ${editedStory.benefit}.`;
       const storyToSave: UserStory = {
         ...editedStory,
         storyText
       };
       
-      // Attempt to save to Supabase
+      // Save to Supabase
       await updateStoryInLocalStorage(storyToSave);
       
-      // If we get here, the save was successful
+      // Success
       toast({
         title: "Story updated",
         description: "Your user story has been updated successfully.",
@@ -134,10 +134,16 @@ export const useEditStoryForm = (
     } catch (error) {
       console.error("Error updating story:", error);
       
-      // Set a more specific error message in the form
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : "Failed to update story. Please try again.";
+      // Set a more specific error message
+      let errorMessage = "Failed to update story. Please try again.";
+      
+      if (error instanceof Error) {
+        // Only show user-friendly part of the error message
+        const errorText = error.message;
+        if (errorText.includes("Database update error:")) {
+          errorMessage = errorText;
+        }
+      }
       
       setError(errorMessage);
       

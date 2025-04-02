@@ -75,13 +75,10 @@ export const updateStoryInLocalStorage = async (updatedStory: UserStory): Promis
   }
   
   try {
-    // Update the story text based on the new inputs
-    const storyText = `As a ${updatedStory.role}, I want to ${updatedStory.goal}, so that ${updatedStory.benefit}.`;
-    
-    // Sanitize data to ensure it's compatible with database requirements
+    // Sanitize data to ensure it's compatible with database schema
     const sanitizedStory = {
       project_id: updatedStory.projectId || null,
-      title: storyText,
+      title: `As a ${updatedStory.role}, I want to ${updatedStory.goal}, so that ${updatedStory.benefit}.`,
       description: updatedStory.additionalNotes || '',
       persona: updatedStory.role || '',
       goal: updatedStory.goal || '',
@@ -91,22 +88,21 @@ export const updateStoryInLocalStorage = async (updatedStory: UserStory): Promis
 
     console.log("Sending update to Supabase with data:", JSON.stringify(sanitizedStory));
     
-    // First update the main story record
-    const { error, data } = await supabase
+    // Update the story in Supabase
+    const { error } = await supabase
       .from('user_stories')
       .update(sanitizedStory)
       .eq('id', updatedStory.id)
-      .eq('user_id', user.id)
-      .select();
+      .eq('user_id', user.id);
     
     if (error) {
       console.error("Error updating in Supabase:", error);
       throw new Error(`Database update error: ${error.message}`);
     }
 
-    console.log("Supabase update successful, rows affected:", data?.length);
-
-    // Update the local storage copy to ensure UI is in sync (non-critical operation)
+    console.log("Story update successful in Supabase for ID:", updatedStory.id);
+    
+    // Update the local storage copy (non-critical operation)
     try {
       const localStorageKey = 'userStories';
       const storedStoriesJson = localStorage.getItem(localStorageKey);
@@ -119,7 +115,7 @@ export const updateStoryInLocalStorage = async (updatedStory: UserStory): Promis
           if (story.id === updatedStory.id) {
             return {
               ...story,
-              storyText,
+              storyText: `As a ${updatedStory.role}, I want to ${updatedStory.goal}, so that ${updatedStory.benefit}.`,
               role: updatedStory.role,
               goal: updatedStory.goal,
               benefit: updatedStory.benefit,
@@ -135,22 +131,13 @@ export const updateStoryInLocalStorage = async (updatedStory: UserStory): Promis
         
         // Save back to localStorage
         localStorage.setItem(localStorageKey, JSON.stringify(updatedStories));
-        console.log("Local storage updated successfully");
       }
     } catch (localStorageErr) {
       console.warn("Error updating local storage (non-critical):", localStorageErr);
       // Continue even if localStorage update fails - Supabase is the source of truth
     }
-    
-    console.log("Story update process completed successfully for ID:", updatedStory.id);
   } catch (err) {
     console.error("Error updating story:", err);
-    // Provide a more detailed error message for debugging but a user-friendly message to throw
-    if (err instanceof Error) {
-      console.error("Error details:", err.message);
-      throw new Error(`Failed to update story: ${err.message}`);
-    } else {
-      throw new Error("Failed to update story. Please try again.");
-    }
+    throw err;
   }
 };
