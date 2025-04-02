@@ -17,9 +17,9 @@ const StoriesGrid: React.FC<StoriesGridProps> = ({ stories, onEdit, onView, onDe
         <StoryCard
           key={story.id}
           story={story}
+          onClick={onView}
           onEdit={onEdit}
-          onDelete={() => onDelete(story.id)}
-          onView={onView}
+          onDelete={onDelete}
         />
       ))}
     </div>

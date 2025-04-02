@@ -3,19 +3,21 @@ import React from "react";
 import { UserStory } from "@/utils/story";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { FileEdit, CheckCircle2, AlertCircle } from "lucide-react";
+import { FileEdit, CheckCircle2, AlertCircle, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface StoryCardProps {
   story: UserStory;
   onClick: (story: UserStory) => void;
   onEdit: (story: UserStory) => void;
+  onDelete?: (storyId: string) => void;
 }
 
 const StoryCard: React.FC<StoryCardProps> = ({
   story,
   onClick,
   onEdit,
+  onDelete,
 }) => {
   // Format date to a readable format
   const formattedDate = new Date(story.createdAt).toLocaleString(undefined, {
@@ -65,18 +67,35 @@ const StoryCard: React.FC<StoryCardProps> = ({
             {truncate(story.storyText, 120)}
           </CardTitle>
           
-          <Button
-            variant="ghost"
-            size="sm"
-            className="absolute top-2 right-2 p-1 h-auto"
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit(story);
-            }}
-          >
-            <FileEdit className="h-4 w-4" />
-            <span className="sr-only">Edit</span>
-          </Button>
+          <div className="absolute top-2 right-2 flex gap-1">
+            {onDelete && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="p-1 h-auto text-destructive hover:text-destructive"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(story.id);
+                }}
+              >
+                <Trash2 className="h-4 w-4" />
+                <span className="sr-only">Delete</span>
+              </Button>
+            )}
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              className="p-1 h-auto"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(story);
+              }}
+            >
+              <FileEdit className="h-4 w-4" />
+              <span className="sr-only">Edit</span>
+            </Button>
+          </div>
         </div>
       </CardHeader>
       

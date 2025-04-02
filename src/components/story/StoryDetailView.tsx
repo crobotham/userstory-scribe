@@ -5,12 +5,15 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, FileEdit, Trash } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface StoryDetailViewProps {
-  story: UserStory;
+  story: UserStory | null;
   onBack: () => void;
   onEdit: (story: UserStory) => void;
   onDelete: (storyId: string) => void;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
 const StoryDetailView: React.FC<StoryDetailViewProps> = ({
@@ -18,7 +21,38 @@ const StoryDetailView: React.FC<StoryDetailViewProps> = ({
   onBack,
   onEdit,
   onDelete,
+  isOpen,
+  onClose,
 }) => {
+  // If the component is used with Dialog (isOpen prop exists)
+  if (isOpen !== undefined && onClose && story) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <StoryDetailContent 
+            story={story} 
+            onBack={onClose} 
+            onEdit={onEdit} 
+            onDelete={onDelete} 
+          />
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // Return the standard view if not using Dialog or if story is null
+  if (!story) return null;
+  
+  return <StoryDetailContent story={story} onBack={onBack} onEdit={onEdit} onDelete={onDelete} />;
+};
+
+// Separate the content to avoid duplication
+const StoryDetailContent: React.FC<{
+  story: UserStory;
+  onBack: () => void;
+  onEdit: (story: UserStory) => void;
+  onDelete: (storyId: string) => void;
+}> = ({ story, onBack, onEdit, onDelete }) => {
   // Format date
   const formattedDate = new Date(story.createdAt).toLocaleString();
   

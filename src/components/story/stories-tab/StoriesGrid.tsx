@@ -42,6 +42,7 @@ const StoriesGrid: React.FC<StoriesGridProps> = ({
         <motion.div key={story.id} variants={item}>
           <StoryCard
             story={story}
+            onClick={onEditClick}
             onEdit={onEditClick}
             onDelete={onDeleteClick}
           />
