@@ -21,7 +21,7 @@ export const useStoryManagement = () => {
   // Setup event listeners
   useStoryEventListeners({
     loadProjects,
-    loadStories: () => {}, // Empty function as stories are no longer used
+    loadStories: async () => Promise.resolve(), // Fixed: Return a Promise to match the expected type
     initialDataLoaded,
     user
   });
