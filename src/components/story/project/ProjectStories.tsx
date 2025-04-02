@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Project, UserStory } from "@/utils/story";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
@@ -35,6 +35,15 @@ const ProjectStories: React.FC<ProjectStoriesProps> = ({
   const [storyToDelete, setStoryToDelete] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
+  // Clear UI state when project or stories change
+  useEffect(() => {
+    setSelectedStory(null);
+    setIsDetailViewOpen(false);
+    setIsEditModalOpen(false);
+    setStoryToDelete(null);
+    setIsDeleteDialogOpen(false);
+  }, [project.id, stories.length]);
+
   // Export handlers
   const { handleExportToPdf, handleExportToCsv } = useExportHandlers({
     stories,
@@ -56,11 +65,13 @@ const ProjectStories: React.FC<ProjectStoriesProps> = ({
   };
 
   const handleDeleteClick = (storyId: string) => {
+    console.log("Opening delete dialog for story:", storyId);
     setStoryToDelete(storyId);
     setIsDeleteDialogOpen(true);
   };
 
   const handleStoryUpdated = () => {
+    console.log("Story updated, notifying parent");
     onStoryUpdated();
     toast({
       title: "Story updated",

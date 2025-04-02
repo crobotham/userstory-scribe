@@ -69,7 +69,8 @@ export const getProjectById = async (projectId: string): Promise<Project | null>
       
     if (error) {
       console.error("Error fetching project from Supabase:", error);
-      throw error;
+      // Use maybeSingle instead to avoid error when item not found
+      return null;
     }
     
     if (!data) {
@@ -87,6 +88,6 @@ export const getProjectById = async (projectId: string): Promise<Project | null>
     };
   } catch (error) {
     console.error("Error finding project in Supabase:", error);
-    throw error;
+    return null;
   }
 };

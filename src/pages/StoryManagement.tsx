@@ -12,10 +12,11 @@ const StoryManagement = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isPageLoading, setIsPageLoading] = useState(true);
-  const [refreshKey, setRefreshKey] = useState(0); // Add state to force re-renders when needed
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Function to force ProjectManagement component to re-mount
   const handleProjectsChanged = useCallback(() => {
+    console.log("Projects changed, forcing refresh");
     setRefreshKey(prev => prev + 1);
   }, []);
 
@@ -28,25 +29,27 @@ const StoryManagement = () => {
         // Reduced delay to improve performance
         setTimeout(() => {
           setIsPageLoading(false);
-        }, 300); // Reduced from 500ms to 300ms
+        }, 200); // Reduced delay further
       }
     }
   }, [user, loading, navigate]);
 
   // Check URL parameters for project selection
   useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const projectId = searchParams.get('projectId');
-    
-    if (projectId) {
-      console.log("StoryManagement detected projectId in URL:", projectId);
-      // Dispatch an event that ProjectManagement listens for
-      const event = new CustomEvent('projectSelected', {
-        detail: { projectId }
-      });
-      window.dispatchEvent(event);
+    if (!isPageLoading && user) {
+      const searchParams = new URLSearchParams(location.search);
+      const projectId = searchParams.get('projectId');
+      
+      if (projectId) {
+        console.log("StoryManagement detected projectId in URL:", projectId);
+        // Dispatch an event that ProjectManagement listens for
+        const event = new CustomEvent('projectSelected', {
+          detail: { projectId }
+        });
+        window.dispatchEvent(event);
+      }
     }
-  }, [location.search]); // Only depend on location.search to prevent re-runs
+  }, [location.search, isPageLoading, user]); // Add dependencies
 
   if (loading || isPageLoading) {
     return (
