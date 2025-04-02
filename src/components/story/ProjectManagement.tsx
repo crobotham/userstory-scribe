@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { 
   Project,
@@ -39,7 +38,6 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ onProjectsChanged
   useEffect(() => {
     loadProjects();
     
-    // Add event listener for project selection
     const handleProjectSelected = (event: CustomEvent) => {
       const { projectId } = event.detail;
       const project = projects.find(p => p.id === projectId);
@@ -55,7 +53,6 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ onProjectsChanged
     };
   }, []);
 
-  // Effect to load story counts when projects change
   useEffect(() => {
     if (projects.length > 0) {
       loadStoryCounts();
@@ -85,34 +82,29 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ onProjectsChanged
 
   const loadStoryCounts = async () => {
     try {
-      // Get the current user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Fetch counts for all projects
-      const { data, error } = await supabase
-        .from('user_stories')
-        .select('project_id, count')
-        .eq('user_id', user.id)
-        .group('project_id');
-
-      if (error) {
-        console.error("Error fetching story counts:", error);
-        return;
-      }
-
-      // Convert data to a map of project_id -> count
       const counts: Record<string, number> = {};
       projects.forEach(project => {
-        counts[project.id] = 0; // Initialize all projects with 0
+        counts[project.id] = 0;
       });
 
-      if (data) {
-        data.forEach(item => {
-          if (item.project_id) {
-            counts[item.project_id] = parseInt(item.count);
-          }
-        });
+      for (const project of projects) {
+        const { data, error } = await supabase
+          .from('user_stories')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('project_id', project.id);
+
+        if (error) {
+          console.error(`Error fetching stories for project ${project.id}:`, error);
+          continue;
+        }
+
+        if (data) {
+          counts[project.id] = data.length;
+        }
       }
 
       setStoryCounts(counts);
@@ -151,7 +143,6 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ onProjectsChanged
         description: `Project "${project.name}" has been updated successfully.`,
       });
 
-      // If the updated project was selected, update the selected project
       if (selectedProject && selectedProject.id === project.id) {
         setSelectedProject(project);
       }
@@ -172,7 +163,6 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ onProjectsChanged
       await deleteProjectFromLocalStorage(projectToDelete.id);
       await loadProjects();
       
-      // If the deleted project was selected, clear the selection
       if (selectedProject && selectedProject.id === projectToDelete.id) {
         setSelectedProject(null);
         setProjectStories([]);
