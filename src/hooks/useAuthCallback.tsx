@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session, User } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 
 export const useAuthCallback = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -11,6 +11,7 @@ export const useAuthCallback = () => {
   const [authCallbackProcessed, setAuthCallbackProcessed] = useState(false);
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     let isMounted = true;
@@ -68,6 +69,10 @@ export const useAuthCallback = () => {
               setUser(session.user);
             }
             
+            // Check if there's a redirect parameter to go back to the original page
+            const redirectPath = searchParams.get("redirect");
+            const targetPath = redirectPath || "/dashboard";
+            
             // Clean up the URL by removing the hash but keep query params
             if (window.history.replaceState) {
               window.history.replaceState(null, document.title, window.location.pathname + window.location.search);
@@ -77,6 +82,13 @@ export const useAuthCallback = () => {
               title: "Signed in successfully",
               description: "Welcome to SonicStories!",
             });
+            
+            // Navigate to the target path
+            setTimeout(() => {
+              if (isMounted) {
+                navigate(targetPath);
+              }
+            }, 500);
           }
         } else {
           console.log("No session found after callback processing");
@@ -109,7 +121,7 @@ export const useAuthCallback = () => {
       isMounted = false;
       clearTimeout(safetyTimeout);
     };
-  }, [toast, authCallbackProcessed, loading, searchParams]);
+  }, [toast, authCallbackProcessed, loading, searchParams, navigate]);
 
   return { loading, authCallbackProcessed };
 };
