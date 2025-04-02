@@ -38,7 +38,7 @@ export const signInWithGoogle = async (): Promise<void> => {
     // Get the current URL's origin (e.g., https://yourdomain.com)
     const origin = window.location.origin;
     
-    // Set the redirect URL to the auth page on the current domain
+    // Set the redirect URL to the origin + /auth path to handle the callback
     const redirectTo = `${origin}/auth`;
     
     console.log(`Starting Google sign-in with redirect URL: ${redirectTo}`);
@@ -47,6 +47,7 @@ export const signInWithGoogle = async (): Promise<void> => {
       provider: 'google',
       options: {
         redirectTo,
+        // Add query params to ensure we get refresh tokens
         queryParams: {
           access_type: 'offline',
           prompt: 'consent'

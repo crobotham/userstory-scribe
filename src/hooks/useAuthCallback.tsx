@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session, User } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 
 export const useAuthCallback = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -11,6 +11,7 @@ export const useAuthCallback = () => {
   const [authCallbackProcessed, setAuthCallbackProcessed] = useState(false);
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     let isMounted = true;
@@ -43,7 +44,7 @@ export const useAuthCallback = () => {
       try {
         // For error parameters, we'll let useAuthPage handle them
         if (window.location.hash.includes("error")) {
-          console.log("Error parameters detected in hash, will be handled by useAuthPage");
+          console.error("Error parameters detected in hash:", window.location.hash);
           setLoading(false);
           return;
         }
@@ -52,6 +53,7 @@ export const useAuthCallback = () => {
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
+          console.error("Error getting session after callback:", error);
           throw error;
         }
         
@@ -66,6 +68,13 @@ export const useAuthCallback = () => {
             if (isMounted) {
               setSession(session);
               setUser(session.user);
+              
+              // Navigate to dashboard on successful auth
+              setTimeout(() => {
+                if (isMounted) {
+                  navigate("/dashboard");
+                }
+              }, 100);
             }
             
             // Clean up the URL by removing the hash but keep query params
@@ -109,7 +118,7 @@ export const useAuthCallback = () => {
       isMounted = false;
       clearTimeout(safetyTimeout);
     };
-  }, [toast, authCallbackProcessed, loading, searchParams]);
+  }, [toast, authCallbackProcessed, loading, searchParams, navigate]);
 
-  return { loading, authCallbackProcessed };
+  return { loading, authCallbackProcessed, session, user };
 };

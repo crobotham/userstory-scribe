@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -33,14 +32,12 @@ const GoogleSignInButton = ({
     }
     
     try {
-      // Provide feedback to user that they're being redirected
-      toast({
-        title: "Redirecting to Google",
-        description: "You will now be redirected to Google for authentication."
-      });
-      
       // Call the provided onClick handler (signInWithGoogle from AuthContext)
       onClick();
+      
+      // Do not show redirect toast here - it's better to inform the user via console
+      // We'll keep the app UI clean and let the browser handle the redirect feedback
+      console.log("Initiating Google sign-in redirect...");
     } catch (error: any) {
       console.error("Error in Google sign-in button handler:", error);
       toast({
