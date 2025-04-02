@@ -122,7 +122,7 @@ export type Database = {
       }
       user_stories: {
         Row: {
-          acceptance_criteria: Json | null
+          acceptance_criteria: string | null
           benefit: string
           created_at: string
           description: string
@@ -131,10 +131,11 @@ export type Database = {
           persona: string
           project_id: string | null
           title: string
+          updated_at: string | null
           user_id: string | null
         }
         Insert: {
-          acceptance_criteria?: Json | null
+          acceptance_criteria?: string | null
           benefit: string
           created_at?: string
           description: string
@@ -143,10 +144,11 @@ export type Database = {
           persona: string
           project_id?: string | null
           title: string
+          updated_at?: string | null
           user_id?: string | null
         }
         Update: {
-          acceptance_criteria?: Json | null
+          acceptance_criteria?: string | null
           benefit?: string
           created_at?: string
           description?: string
@@ -155,6 +157,7 @@ export type Database = {
           persona?: string
           project_id?: string | null
           title?: string
+          updated_at?: string | null
           user_id?: string | null
         }
         Relationships: [

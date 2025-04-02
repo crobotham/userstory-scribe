@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 export const deleteStoryFromLocalStorage = async (storyId: string): Promise<void> => {
   console.log("Starting story deletion process for ID:", storyId);
   
-  // Get current user
   const { data: { user } } = await supabase.auth.getUser();
   
   if (!user) {
@@ -12,8 +11,6 @@ export const deleteStoryFromLocalStorage = async (storyId: string): Promise<void
   }
   
   try {
-    // Delete story from Supabase
-    console.log("Sending delete request to Supabase for story ID:", storyId);
     const { error } = await supabase
       .from('user_stories')
       .delete()
@@ -22,7 +19,7 @@ export const deleteStoryFromLocalStorage = async (storyId: string): Promise<void
     
     if (error) {
       console.error("Error deleting from Supabase:", error);
-      throw new Error(`Database deletion error: ${error.message}`);
+      throw new Error(`Database delete error: ${error.message}`);
     }
 
     console.log("Story deletion successful in Supabase for ID:", storyId);
