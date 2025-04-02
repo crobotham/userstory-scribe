@@ -6,6 +6,7 @@ import { useToast as useHookToast } from "@/hooks/use-toast";
 const ToastContext = createContext<ReturnType<typeof useHookToast> | undefined>(undefined);
 
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Get the toast implementation from the hook
   const toast = useHookToast();
   
   // Create a memoized version of the context value to prevent unnecessary rerenders
