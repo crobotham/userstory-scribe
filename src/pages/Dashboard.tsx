@@ -8,7 +8,6 @@ import FooterSection from "@/components/home/FooterSection";
 import NewsBanner from "@/components/dashboard/NewsBanner";
 import { Loader2 } from "lucide-react";
 import { ToastProvider } from "@/contexts/ToastContext";
-import { Toaster } from "@/components/ui/toaster";
 
 const Dashboard = () => {
   const { user, loading } = useAuth();
@@ -73,7 +72,6 @@ const Dashboard = () => {
         </main>
         
         <FooterSection />
-        <Toaster />
       </div>
     </ToastProvider>
   );
