@@ -1,6 +1,7 @@
 
 import { UserStory, StoredUserStory } from '../types';
 import { supabase } from "@/integrations/supabase/client";
+import { Json } from '@/integrations/supabase/types';
 
 // Get stories from Supabase
 export const getStoriesFromLocalStorage = async (): Promise<UserStory[]> => {
@@ -53,7 +54,7 @@ export const getStoriesFromLocalStorage = async (): Promise<UserStory[]> => {
 };
 
 // Helper function to safely parse acceptance criteria to string array
-const parseAcceptanceCriteria = (criteria: any): string[] => {
+const parseAcceptanceCriteria = (criteria: Json | null): string[] => {
   if (!criteria) return [];
   
   try {
