@@ -16,7 +16,7 @@ if (!rootElement) {
   const root = createRoot(rootElement);
   
   try {
-    // Wrap the app in an error boundary
+    // Wrap the app in StrictMode for better development experience
     root.render(
       <StrictMode>
         <App />

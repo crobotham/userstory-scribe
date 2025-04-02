@@ -9,11 +9,9 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Get the toast implementation from the hook
   const toast = useHookToast();
   
-  // Create a memoized version of the context value to prevent unnecessary rerenders
-  const contextValue = React.useMemo(() => toast, [toast]);
-  
+  // Provide the toast context to all children
   return (
-    <ToastContext.Provider value={contextValue}>
+    <ToastContext.Provider value={toast}>
       {children}
     </ToastContext.Provider>
   );

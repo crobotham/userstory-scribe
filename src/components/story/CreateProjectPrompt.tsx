@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import NewProjectDialog from "./NewProjectDialog";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/contexts/ToastContext";
 
 interface CreateProjectPromptProps {
   onCreateProject: (name: string, description?: string) => Promise<any>;

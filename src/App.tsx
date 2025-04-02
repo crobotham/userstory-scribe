@@ -29,9 +29,9 @@ const App = () => {
   
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <AuthProvider>
-          <ToastProvider>
+      <ToastProvider>
+        <BrowserRouter>
+          <AuthProvider>
             <TooltipProvider>
               <Routes>
                 <Route path="/auth" element={<Auth />} />
@@ -85,13 +85,13 @@ const App = () => {
                 />
                 <Route path="*" element={<NotFound />} />
               </Routes>
-              {/* Place toasters at the app level to avoid duplicates */}
+              {/* Place toasters at the app level */}
               <Toaster />
               <Sonner position="top-right" />
             </TooltipProvider>
-          </ToastProvider>
-        </AuthProvider>
-      </BrowserRouter>
+          </AuthProvider>
+        </BrowserRouter>
+      </ToastProvider>
     </QueryClientProvider>
   );
 };
