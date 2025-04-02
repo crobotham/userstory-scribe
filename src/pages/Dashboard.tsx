@@ -7,7 +7,6 @@ import QuestionFlow from "@/components/QuestionFlow";
 import FooterSection from "@/components/home/FooterSection";
 import NewsBanner from "@/components/dashboard/NewsBanner";
 import { Loader2 } from "lucide-react";
-import { Toaster } from "@/components/ui/toaster";
 
 const Dashboard = () => {
   console.log("Dashboard component rendering");
@@ -73,7 +72,6 @@ const Dashboard = () => {
       </main>
       
       <FooterSection />
-      <Toaster />
     </div>
   );
 };

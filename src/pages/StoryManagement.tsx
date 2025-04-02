@@ -6,7 +6,6 @@ import Header from "@/components/Header";
 import StoryHistory from "@/components/StoryHistory";
 import FooterSection from "@/components/home/FooterSection";
 import { Loader2 } from "lucide-react";
-import { Toaster } from "@/components/ui/toaster";
 
 const StoryManagement = () => {
   console.log("StoryManagement component rendering");
@@ -77,7 +76,6 @@ const StoryManagement = () => {
       </main>
       
       <FooterSection />
-      <Toaster />
     </div>
   );
 };
