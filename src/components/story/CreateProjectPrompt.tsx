@@ -13,7 +13,9 @@ const CreateProjectPrompt: React.FC<CreateProjectPromptProps> = ({
   onCreateProject,
   preselectedProjectId 
 }) => {
-  const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(!preselectedProjectId); // Only auto-open if no project ID
+  // Set the initial state of dialog to false whether there's a preselected project or not
+  // We should never auto-open this dialog unless explicitly requested
+  const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
   const { toast } = useToast();
   
   useEffect(() => {
