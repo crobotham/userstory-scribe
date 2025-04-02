@@ -130,11 +130,12 @@ export const useEditStoryForm = (
       onClose();
     } catch (error) {
       console.error("Error updating story:", error);
-      setError("Failed to update story. Please try again.");
+      setError(error instanceof Error ? error.message : "Failed to update story. Please try again.");
       
+      // Show toast only if form is still open
       toast({
         title: "Update failed",
-        description: "There was an error updating your story.",
+        description: error instanceof Error ? error.message : "There was an error updating your story.",
         variant: "destructive",
       });
     } finally {

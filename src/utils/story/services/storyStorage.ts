@@ -76,6 +76,9 @@ export const updateStoryInLocalStorage = async (updatedStory: UserStory): Promis
     // Update the story text based on the new inputs
     const storyText = `As a ${updatedStory.role}, I want to ${updatedStory.goal}, so that ${updatedStory.benefit}.`;
     
+    // Format acceptance criteria properly for storage
+    let formattedAcceptanceCriteria = updatedStory.acceptanceCriteria || [];
+    
     // First update the main story record
     const { error } = await supabase
       .from('user_stories')
@@ -93,16 +96,16 @@ export const updateStoryInLocalStorage = async (updatedStory: UserStory): Promis
     
     if (error) {
       console.error("Error updating in Supabase:", error);
-      throw error;
+      throw new Error(`Database update error: ${error.message}`);
     }
 
     // Update the local storage copy to ensure UI is in sync
     // This updates any cached stories in memory and ensures they reflect the new values
-    const localStorageKey = 'userStories';
-    const storedStoriesJson = localStorage.getItem(localStorageKey);
-    
-    if (storedStoriesJson) {
-      try {
+    try {
+      const localStorageKey = 'userStories';
+      const storedStoriesJson = localStorage.getItem(localStorageKey);
+      
+      if (storedStoriesJson) {
         const storedStories: StoredUserStory[] = JSON.parse(storedStoriesJson);
         
         // Find and update the story in local storage
@@ -115,7 +118,7 @@ export const updateStoryInLocalStorage = async (updatedStory: UserStory): Promis
               goal: updatedStory.goal,
               benefit: updatedStory.benefit,
               priority: updatedStory.priority,
-              acceptanceCriteria: updatedStory.acceptanceCriteria,
+              acceptanceCriteria: formattedAcceptanceCriteria,
               additionalNotes: updatedStory.additionalNotes,
               projectId: updatedStory.projectId,
               projectName: updatedStory.projectName
@@ -126,15 +129,16 @@ export const updateStoryInLocalStorage = async (updatedStory: UserStory): Promis
         
         // Save back to localStorage
         localStorage.setItem(localStorageKey, JSON.stringify(updatedStories));
-      } catch (err) {
-        console.error("Error updating local storage:", err);
-        // Continue even if localStorage update fails - Supabase is the source of truth
       }
+    } catch (localStorageErr) {
+      console.warn("Error updating local storage (non-critical):", localStorageErr);
+      // Continue even if localStorage update fails - Supabase is the source of truth
     }
     
     console.log("Story updated successfully:", updatedStory.id);
   } catch (err) {
-    console.error("Error updating in Supabase:", err);
-    throw err;
+    console.error("Error updating story:", err);
+    // Rethrow a more specific error
+    throw new Error("Failed to update story. Please try again.");
   }
 };
