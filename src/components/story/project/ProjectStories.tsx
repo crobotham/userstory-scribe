@@ -1,27 +1,16 @@
+
 import React, { useState } from "react";
 import { Project, UserStory } from "@/utils/story";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
-import { exportStoriesToExcel } from "@/utils/story/exportService";
-import { exportStoriesToPdf } from "@/utils/story/exportPdfService";
 import { useToast } from "@/hooks/use-toast";
-import StoryDetailView from "../StoryDetailView";
 import EditStoryModal from "@/components/EditStoryModal";
 import ProjectHeader from "./ProjectHeader";
 import EmptyStoriesView from "./EmptyStoriesView";
 import StoriesGrid from "./StoriesGrid";
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { deleteStoryFromLocalStorage } from "@/utils/story/services/storyDelete";
-import DeleteConfirmationDialog from "../DeleteConfirmationDialog";
+import DeleteStoryHandler from "./DeleteStoryHandler";
+import StoryDetailHandler from "./StoryDetailHandler";
+import { useExportHandlers } from "./ExportHandlers";
 
 interface ProjectStoriesProps {
   project: Project;
@@ -46,6 +35,12 @@ const ProjectStories: React.FC<ProjectStoriesProps> = ({
   const [storyToDelete, setStoryToDelete] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
+  // Export handlers
+  const { handleExportToPdf, handleExportToCsv } = useExportHandlers({
+    stories,
+    projectName: project.name
+  });
+
   const handleCreateStory = () => {
     navigate(`/dashboard?projectId=${project.id}`);
   };
@@ -65,80 +60,12 @@ const ProjectStories: React.FC<ProjectStoriesProps> = ({
     setIsDeleteDialogOpen(true);
   };
 
-  const confirmDelete = async () => {
-    if (!storyToDelete) return;
-    
-    try {
-      await deleteStoryFromLocalStorage(storyToDelete);
-      onStoryUpdated();
-      toast({
-        title: "Story deleted",
-        description: "Your user story has been deleted successfully.",
-      });
-    } catch (error) {
-      console.error("Error deleting story:", error);
-      toast({
-        title: "Delete failed",
-        description: "There was an error deleting your story.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsDeleteDialogOpen(false);
-      setStoryToDelete(null);
-      setIsDetailViewOpen(false);
-    }
-  };
-
-  const handleCancelDelete = () => {
-    setIsDeleteDialogOpen(false);
-    setStoryToDelete(null);
-  };
-
   const handleStoryUpdated = () => {
     onStoryUpdated();
     toast({
       title: "Story updated",
       description: "Your user story has been updated successfully.",
     });
-  };
-
-  const handleExportToPdf = () => {
-    if (stories.length === 0) {
-      toast({
-        title: "No stories to export",
-        description: "Create some stories first before exporting.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    exportStoriesToPdf(stories, project.name);
-    toast({
-      title: "Export successful",
-      description: "Your stories have been exported to PDF",
-    });
-  };
-  
-  const handleExportToCsv = () => {
-    if (stories.length === 0) {
-      toast({
-        title: "No stories to export",
-        description: "Create some stories first before exporting.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    exportStoriesToExcel(stories);
-    toast({
-      title: "Export successful",
-      description: "Your stories have been exported to CSV",
-    });
-  };
-
-  const handleCloseDetailView = () => {
-    setIsDetailViewOpen(false);
-    setSelectedStory(null);
   };
 
   return (
@@ -168,12 +95,12 @@ const ProjectStories: React.FC<ProjectStoriesProps> = ({
         />
       )}
 
-      <StoryDetailView 
-        story={selectedStory}
-        isOpen={isDetailViewOpen}
-        onClose={handleCloseDetailView}
+      <StoryDetailHandler
+        selectedStory={selectedStory}
+        isDetailViewOpen={isDetailViewOpen}
+        setIsDetailViewOpen={setIsDetailViewOpen}
+        setSelectedStory={setSelectedStory}
         onEdit={handleEditStory}
-        onBack={handleCloseDetailView}
         onDelete={handleDeleteClick}
       />
 
@@ -185,29 +112,14 @@ const ProjectStories: React.FC<ProjectStoriesProps> = ({
         projects={[project]}
       />
 
-      <AlertDialog 
-        open={isDeleteDialogOpen} 
-        onOpenChange={(open) => {
-          if (!open) {
-            handleCancelDelete();
-          }
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete User Story</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this user story? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleCancelDelete}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteStoryHandler
+        storyToDelete={storyToDelete}
+        isDeleteDialogOpen={isDeleteDialogOpen}
+        setIsDeleteDialogOpen={setIsDeleteDialogOpen}
+        setStoryToDelete={setStoryToDelete}
+        setIsDetailViewOpen={setIsDetailViewOpen}
+        onStoryUpdated={onStoryUpdated}
+      />
     </div>
   );
 };
