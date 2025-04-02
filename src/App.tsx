@@ -68,7 +68,7 @@ const App = () => {
                   } 
                 />
                 <Route 
-                  path="/stories" 
+                  path="/projects" 
                   element={
                     <ProtectedRoute>
                       <StoryManagement />

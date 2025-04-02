@@ -21,37 +21,17 @@ const StoryManagement = () => {
         // Give a larger delay to ensure components mount properly
         setTimeout(() => {
           setIsPageLoading(false);
-        }, 1500); // Increased from 1000ms to 1500ms
+        }, 1000);
       }
     }
   }, [user, loading, navigate]);
-
-  // Handle URL parameters for project selection
-  useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const projectId = searchParams.get('projectId');
-    
-    if (projectId) {
-      // Switch to stories tab and select the project
-      console.log("URL contains projectId:", projectId);
-      const event = new CustomEvent('switchToDashboardTab', {
-        detail: { tab: 'stories', projectId }
-      });
-      window.dispatchEvent(event);
-    }
-  }, []);
-
-  // Add debugging logs
-  useEffect(() => {
-    console.log("StoryManagement - Auth state:", { user, loading, isPageLoading });
-  }, [user, loading, isPageLoading]);
 
   if (loading || isPageLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-slate-50">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading your stories...</p>
+          <p className="text-muted-foreground">Loading your projects...</p>
         </div>
       </div>
     );
@@ -65,10 +45,10 @@ const StoryManagement = () => {
         <div className="py-8 px-4 max-w-6xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold tracking-tight mb-2">
-              Story Management
+              Project Management
             </h1>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              View, edit, and organize your user stories and projects
+              View, create, and organize your projects
             </p>
           </div>
           
