@@ -1,19 +1,11 @@
 
-import React, { useEffect } from "react";
+import React from "react";
 import ProjectManagement from "./story/ProjectManagement";
-import { useProjectManagement } from "@/hooks/useProjectManagement";
 
-const StoryHistory: React.FC = () => {
-  const { loadProjects } = useProjectManagement();
-  
-  useEffect(() => {
-    console.log("StoryHistory - Component mounted, loading projects");
-    loadProjects();
-  }, [loadProjects]);
-  
+const StoryHistory: React.FC = () => {  
   return (
     <div>
-      <ProjectManagement onProjectsChanged={loadProjects} />
+      <ProjectManagement onProjectsChanged={() => {}} />
     </div>
   );
 };

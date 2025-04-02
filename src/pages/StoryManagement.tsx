@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
-import StoryHistory from "@/components/StoryHistory";
+import ProjectManagement from "@/components/story/ProjectManagement";
 import FooterSection from "@/components/home/FooterSection";
 import { Loader2 } from "lucide-react";
 
@@ -53,7 +53,7 @@ const StoryManagement = () => {
           </div>
           
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <StoryHistory />
+            <ProjectManagement onProjectsChanged={() => {}} />
           </div>
         </div>
       </main>

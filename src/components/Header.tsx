@@ -66,7 +66,7 @@ const Header: React.FC<HeaderProps> = ({ isDashboard = false }) => {
                 className="hidden md:inline-flex"
               >
                 <Sparkle className="h-4 w-4 mr-2" />
-                Create Stories
+                Create
               </Button>
               
               <Link 
@@ -86,7 +86,7 @@ const Header: React.FC<HeaderProps> = ({ isDashboard = false }) => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={() => navigate('/dashboard')}>
-                    Create Stories
+                    Create
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/projects')}>
                     Manage Projects
@@ -154,7 +154,7 @@ const Header: React.FC<HeaderProps> = ({ isDashboard = false }) => {
                       }}
                     >
                       <Sparkle className="h-4 w-4 mr-2" />
-                      Create Stories
+                      Create
                     </Button>
                     <Link 
                       to="/projects" 
