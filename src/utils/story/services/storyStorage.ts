@@ -76,11 +76,12 @@ export const updateStoryInLocalStorage = async (updatedStory: UserStory): Promis
     // Update the story text based on the new inputs
     const storyText = `As a ${updatedStory.role}, I want to ${updatedStory.goal}, so that ${updatedStory.benefit}.`;
     
+    // First update the main story record
     const { error } = await supabase
       .from('user_stories')
       .update({
         project_id: updatedStory.projectId,
-        title: storyText,
+        title: storyText, // Set the formatted story text
         description: updatedStory.additionalNotes || '',
         persona: updatedStory.role,
         goal: updatedStory.goal,
@@ -94,8 +95,44 @@ export const updateStoryInLocalStorage = async (updatedStory: UserStory): Promis
       console.error("Error updating in Supabase:", error);
       throw error;
     }
+
+    // Update the local storage copy to ensure UI is in sync
+    // This updates any cached stories in memory and ensures they reflect the new values
+    const localStorageKey = 'userStories';
+    const storedStoriesJson = localStorage.getItem(localStorageKey);
     
-    console.log("Story updated in Supabase successfully:", updatedStory.id);
+    if (storedStoriesJson) {
+      try {
+        const storedStories: StoredUserStory[] = JSON.parse(storedStoriesJson);
+        
+        // Find and update the story in local storage
+        const updatedStories = storedStories.map(story => {
+          if (story.id === updatedStory.id) {
+            return {
+              ...story,
+              storyText, // Update the formatted story text
+              role: updatedStory.role,
+              goal: updatedStory.goal,
+              benefit: updatedStory.benefit,
+              priority: updatedStory.priority,
+              acceptanceCriteria: updatedStory.acceptanceCriteria,
+              additionalNotes: updatedStory.additionalNotes,
+              projectId: updatedStory.projectId,
+              projectName: updatedStory.projectName
+            };
+          }
+          return story;
+        });
+        
+        // Save back to localStorage
+        localStorage.setItem(localStorageKey, JSON.stringify(updatedStories));
+      } catch (err) {
+        console.error("Error updating local storage:", err);
+        // Continue even if localStorage update fails - Supabase is the source of truth
+      }
+    }
+    
+    console.log("Story updated successfully:", updatedStory.id);
   } catch (err) {
     console.error("Error updating in Supabase:", err);
     throw err;

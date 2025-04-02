@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import EditStoryFormFields from "./story/EditStoryFormFields";
 import { useEditStoryForm } from "@/hooks/useEditStoryForm";
+import { Loader2 } from "lucide-react";
 
 interface EditStoryModalProps {
   story: UserStory | null;
@@ -29,6 +30,8 @@ const EditStoryModal: React.FC<EditStoryModalProps> = ({
 }) => {
   const {
     editedStory,
+    isSubmitting,
+    error,
     handleInputChange,
     handleAcceptanceCriteriaChange,
     handleProjectChange,
@@ -52,9 +55,22 @@ const EditStoryModal: React.FC<EditStoryModalProps> = ({
           onProjectChange={handleProjectChange}
         />
         
+        {error && (
+          <p className="text-sm text-destructive">{error}</p>
+        )}
+        
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={handleSave}>Save Changes</Button>
+          <Button variant="outline" onClick={onClose} disabled={isSubmitting}>Cancel</Button>
+          <Button onClick={handleSave} disabled={isSubmitting}>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              'Save Changes'
+            )}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
