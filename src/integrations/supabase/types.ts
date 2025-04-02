@@ -122,6 +122,7 @@ export type Database = {
       }
       user_stories: {
         Row: {
+          acceptance_criteria: Json | null
           benefit: string
           created_at: string
           description: string
@@ -133,6 +134,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          acceptance_criteria?: Json | null
           benefit: string
           created_at?: string
           description: string
@@ -144,6 +146,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          acceptance_criteria?: Json | null
           benefit?: string
           created_at?: string
           description?: string
