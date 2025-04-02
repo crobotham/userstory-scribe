@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
@@ -12,6 +12,12 @@ const StoryManagement = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isPageLoading, setIsPageLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0); // Add state to force re-renders when needed
+
+  // Function to force ProjectManagement component to re-mount
+  const handleProjectsChanged = useCallback(() => {
+    setRefreshKey(prev => prev + 1);
+  }, []);
 
   // Redirect unauthenticated users to home page
   useEffect(() => {
@@ -22,7 +28,7 @@ const StoryManagement = () => {
         // Reduced delay to improve performance
         setTimeout(() => {
           setIsPageLoading(false);
-        }, 500); // Reduced from 1000ms to 500ms
+        }, 300); // Reduced from 500ms to 300ms
       }
     }
   }, [user, loading, navigate]);
@@ -69,7 +75,10 @@ const StoryManagement = () => {
           </div>
           
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <ProjectManagement onProjectsChanged={() => {}} />
+            <ProjectManagement 
+              key={refreshKey} 
+              onProjectsChanged={handleProjectsChanged} 
+            />
           </div>
         </div>
       </main>

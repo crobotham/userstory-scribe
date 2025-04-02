@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import NewProjectDialog from "./NewProjectDialog";
 import DeleteConfirmationDialog from "./DeleteConfirmationDialog";
@@ -33,8 +33,22 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ onProjectsChanged
     handleUpdateProject,
     handleDeleteProject,
     handleProjectSelect,
-    handleBackToProjects
+    handleBackToProjects,
+    loadProjects
   } = useProjectManagementState(onProjectsChanged);
+
+  // Ensure projects are loaded when component mounts
+  useEffect(() => {
+    loadProjects();
+  }, [loadProjects]);
+
+  // Force reload projects when selectedProject changes to null
+  // This ensures the project list is refreshed when returning from story view
+  useEffect(() => {
+    if (selectedProject === null) {
+      loadProjects();
+    }
+  }, [selectedProject, loadProjects]);
 
   return (
     <div className="space-y-6">
@@ -61,6 +75,9 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ onProjectsChanged
           stories={projectStories}
           isLoading={isLoadingStories}
           onBackClick={handleBackToProjects}
+          onStoryUpdated={() => {
+            loadProjects();
+          }}
         />
       )}
 
