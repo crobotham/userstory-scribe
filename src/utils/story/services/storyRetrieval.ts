@@ -2,6 +2,19 @@
 import { UserStory, StoredUserStory } from '../types';
 import { supabase } from "@/integrations/supabase/client";
 
+// Utility function to parse acceptance criteria
+const parseAcceptanceCriteria = (criteria: string | null): string[] => {
+  if (!criteria) return [];
+  try {
+    // Try parsing as JSON array
+    const parsed = JSON.parse(criteria);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    // If parsing fails, return an empty array
+    return [];
+  }
+};
+
 // Get stories from Supabase
 export const getStoriesFromLocalStorage = async (): Promise<UserStory[]> => {
   // Get current user
@@ -38,7 +51,8 @@ export const getStoriesFromLocalStorage = async (): Promise<UserStory[]> => {
       goal: item.goal,
       benefit: item.benefit,
       priority: determinePriority(item.description || ""), // Convert string to proper enum value
-      acceptanceCriteria: [],
+      // Parse acceptance criteria from the stored JSON string
+      acceptanceCriteria: parseAcceptanceCriteria(item.acceptance_criteria),
       additionalNotes: item.description,
       projectId: item.project_id,
       projectName: item.projects?.name,
@@ -65,7 +79,7 @@ const determinePriority = (description: string): "High" | "Medium" | "Low" => {
   }
 };
 
-// Get stories for a specific project
+// Similar changes for getStoriesByProject
 export const getStoriesByProject = async (projectId: string | null): Promise<UserStory[]> => {
   console.log("getStoriesByProject called with projectId:", projectId);
   
@@ -114,7 +128,8 @@ export const getStoriesByProject = async (projectId: string | null): Promise<Use
       goal: item.goal,
       benefit: item.benefit,
       priority: determinePriority(item.description || ""), // Use helper function
-      acceptanceCriteria: [],
+      // Parse acceptance criteria from the stored JSON string
+      acceptanceCriteria: parseAcceptanceCriteria(item.acceptance_criteria),
       additionalNotes: item.description,
       projectId: item.project_id,
       projectName: item.projects?.name,
