@@ -20,7 +20,8 @@ export const updateStoryInLocalStorage = async (updatedStory: UserStory): Promis
       persona: updatedStory.role || '',
       goal: updatedStory.goal || '',
       benefit: updatedStory.benefit || '',
-      acceptance_criteria: updatedStory.acceptanceCriteria || [], // New field added here
+      // Store acceptance criteria as JSONB array
+      acceptance_criteria: updatedStory.acceptanceCriteria || [], 
       updated_at: new Date().toISOString()
     };
 

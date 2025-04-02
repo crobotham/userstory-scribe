@@ -38,7 +38,7 @@ export const getStoriesFromLocalStorage = async (): Promise<UserStory[]> => {
       goal: item.goal,
       benefit: item.benefit,
       priority: determinePriority(item.description || ""), // Convert string to proper enum value
-      acceptanceCriteria: Array.isArray(item.acceptance_criteria) ? item.acceptance_criteria : [], // Ensure it's an array
+      acceptanceCriteria: parseAcceptanceCriteria(item.acceptance_criteria), // Ensure we parse to string array
       additionalNotes: item.description,
       projectId: item.project_id,
       projectName: item.projects?.name,
@@ -49,6 +49,39 @@ export const getStoriesFromLocalStorage = async (): Promise<UserStory[]> => {
   } catch (err) {
     console.error("Error fetching stories from Supabase:", err);
     throw err;
+  }
+};
+
+// Helper function to safely parse acceptance criteria to string array
+const parseAcceptanceCriteria = (criteria: any): string[] => {
+  if (!criteria) return [];
+  
+  try {
+    // If it's already an array, map each item to string
+    if (Array.isArray(criteria)) {
+      return criteria.map(item => String(item));
+    }
+    
+    // If it's a JSON string, parse it first
+    if (typeof criteria === 'string') {
+      try {
+        const parsed = JSON.parse(criteria);
+        if (Array.isArray(parsed)) {
+          return parsed.map(item => String(item));
+        }
+      } catch (e) {
+        // If not valid JSON, split by newlines or return as single item
+        return criteria.includes('\n') 
+          ? criteria.split('\n').filter(item => item.trim() !== '')
+          : [criteria];
+      }
+    }
+    
+    // Fallback: return empty array
+    return [];
+  } catch (e) {
+    console.error("Error parsing acceptance criteria:", e);
+    return [];
   }
 };
 
@@ -114,7 +147,7 @@ export const getStoriesByProject = async (projectId: string | null): Promise<Use
       goal: item.goal,
       benefit: item.benefit,
       priority: determinePriority(item.description || ""), // Use helper function
-      acceptanceCriteria: Array.isArray(item.acceptance_criteria) ? item.acceptance_criteria : [], // Ensure it's an array
+      acceptanceCriteria: parseAcceptanceCriteria(item.acceptance_criteria), // Ensure we parse to string array
       additionalNotes: item.description,
       projectId: item.project_id,
       projectName: item.projects?.name,
