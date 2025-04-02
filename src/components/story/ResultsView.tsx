@@ -24,8 +24,8 @@ const ResultsView: React.FC<ResultsViewProps> = ({ story, onReset }) => {
   const navigate = useNavigate();
 
   const handleDone = () => {
-    // Navigate to Story Management page with the project selected
-    navigate(`/stories?projectId=${story.projectId}`);
+    // Navigate to Projects Management page with the project selected
+    navigate(`/projects?projectId=${story.projectId}`);
   };
 
   const handleCopyToClipboard = () => {

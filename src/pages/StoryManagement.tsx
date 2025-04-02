@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
 import ProjectManagement from "@/components/story/ProjectManagement";
@@ -10,6 +10,7 @@ import { Loader2 } from "lucide-react";
 const StoryManagement = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isPageLoading, setIsPageLoading] = useState(true);
 
   // Redirect unauthenticated users to home page
@@ -25,6 +26,21 @@ const StoryManagement = () => {
       }
     }
   }, [user, loading, navigate]);
+
+  // Check URL parameters for project selection
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const projectId = searchParams.get('projectId');
+    
+    if (projectId) {
+      console.log("StoryManagement detected projectId in URL:", projectId);
+      // Dispatch an event that ProjectManagement listens for
+      const event = new CustomEvent('projectSelected', {
+        detail: { projectId }
+      });
+      window.dispatchEvent(event);
+    }
+  }, [location.search]); // Only depend on location.search to prevent re-runs
 
   if (loading || isPageLoading) {
     return (
