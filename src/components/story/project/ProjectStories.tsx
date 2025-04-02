@@ -1,6 +1,5 @@
-
 import React, { useState } from "react";
-import { Project, UserStory, deleteStoryFromLocalStorage } from "@/utils/story";
+import { Project, UserStory } from "@/utils/story";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { exportStoriesToExcel } from "@/utils/story/exportService";
@@ -21,6 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { deleteStoryFromLocalStorage } from "@/utils/story/services/storyDelete";
 
 interface ProjectStoriesProps {
   project: Project;
@@ -156,7 +156,6 @@ const ProjectStories: React.FC<ProjectStoriesProps> = ({
         />
       )}
 
-      {/* Detail View Modal */}
       <StoryDetailView 
         story={selectedStory}
         isOpen={isDetailViewOpen}
@@ -164,7 +163,6 @@ const ProjectStories: React.FC<ProjectStoriesProps> = ({
         onEdit={handleEditStory}
       />
 
-      {/* Edit Modal */}
       <EditStoryModal 
         story={selectedStory}
         isOpen={isEditModalOpen}
@@ -173,7 +171,6 @@ const ProjectStories: React.FC<ProjectStoriesProps> = ({
         projects={[project]}
       />
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

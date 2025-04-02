@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import Question from "../question";
 import ProgressIndicator from "../ProgressIndicator";
@@ -47,8 +46,9 @@ const StepByStepFlow: React.FC<StepByStepFlowProps> = ({
   const [projectSelected, setProjectSelected] = useState(false);
   
   useEffect(() => {
-    // Check if project is already selected (for returning users)
+    // Check if project is already selected (for returning users or from URL)
     if (inputs.projectId) {
+      console.log("Project already selected:", inputs.projectId);
       setProjectSelected(true);
     }
   }, [inputs.projectId]);
@@ -123,6 +123,7 @@ const StepByStepFlow: React.FC<StepByStepFlowProps> = ({
   }
   
   // First, we show the project selection step until a project is selected
+  // Skip this step if a project is already selected from URL parameters
   if (!projectSelected) {
     return (
       <>

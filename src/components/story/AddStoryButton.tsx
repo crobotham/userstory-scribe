@@ -12,9 +12,10 @@ interface AddStoryButtonProps {
 const AddStoryButton: React.FC<AddStoryButtonProps> = ({ selectedProject }) => {
   const navigate = useNavigate();
 
-  const handleAddProject = () => {
-    // If a project is selected, navigate to Create dashboard with the project ID
+  const handleAddStory = () => {
+    // If a project is selected, navigate to dashboard with the project ID
     if (selectedProject) {
+      console.log("Creating story for selected project:", selectedProject.name);
       // Navigate to dashboard with the project ID as a query parameter
       navigate(`/dashboard?projectId=${selectedProject.id}`);
     } else {
@@ -24,9 +25,9 @@ const AddStoryButton: React.FC<AddStoryButtonProps> = ({ selectedProject }) => {
   };
 
   return (
-    <Button onClick={handleAddProject} className="flex items-center gap-1">
+    <Button onClick={handleAddStory} className="flex items-center gap-1">
       <Plus size={16} />
-      <span>Add Project</span>
+      <span>Add Story</span>
     </Button>
   );
 };

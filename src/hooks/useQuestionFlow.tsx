@@ -66,6 +66,7 @@ export const useQuestionFlow = () => {
   
   const handleReset = useCallback(() => {
     setCurrentStep(0);
+    const projectId = inputs.projectId;
     setInputs({
       role: "",
       goal: "",
@@ -73,9 +74,10 @@ export const useQuestionFlow = () => {
       priority: "Medium",
       acceptanceCriteria: [],
       additionalNotes: "",
+      projectId
     });
     resetStory();
-  }, [resetStory]);
+  }, [resetStory, inputs.projectId]);
   
   // Project creation
   const handleCreateProject = useCallback(async (name: string, description?: string) => {
@@ -96,6 +98,7 @@ export const useQuestionFlow = () => {
   
   // Set project from ID
   const setProjectFromId = useCallback((projectId: string) => {
+    console.log("Setting project from ID:", projectId);
     handleInputChange("projectId", projectId);
   }, [handleInputChange]);
   
