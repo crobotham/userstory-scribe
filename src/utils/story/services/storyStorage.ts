@@ -20,8 +20,8 @@ export const updateStoryInLocalStorage = async (updatedStory: UserStory): Promis
       persona: updatedStory.role || '',
       goal: updatedStory.goal || '',
       benefit: updatedStory.benefit || '',
-      // Store acceptance criteria as a proper JSONB array, not a string
-      acceptance_criteria: updatedStory.acceptanceCriteria || [], 
+      // Convert acceptance criteria array to JSON string for text field
+      acceptance_criteria: JSON.stringify(updatedStory.acceptanceCriteria || []), 
       updated_at: new Date().toISOString()
     };
 

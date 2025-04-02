@@ -1,4 +1,3 @@
-
 import { UserStory, StoredUserStory } from '../types';
 import { supabase } from "@/integrations/supabase/client";
 import { Json } from '@/integrations/supabase/types';
@@ -39,7 +38,7 @@ export const getStoriesFromLocalStorage = async (): Promise<UserStory[]> => {
       goal: item.goal,
       benefit: item.benefit,
       priority: determinePriority(item.description || ""), // Convert string to proper enum value
-      acceptanceCriteria: parseAcceptanceCriteria(item.acceptance_criteria), // Ensure we parse to string array
+      acceptanceCriteria: parseAcceptanceCriteria(item.acceptance_criteria), // Parse text to string array
       additionalNotes: item.description,
       projectId: item.project_id,
       projectName: item.projects?.name,
@@ -53,37 +52,30 @@ export const getStoriesFromLocalStorage = async (): Promise<UserStory[]> => {
   }
 };
 
-// Helper function to safely parse acceptance criteria to string array
-const parseAcceptanceCriteria = (criteria: Json | null): string[] => {
+// Helper function to safely parse acceptance criteria from text to string array
+const parseAcceptanceCriteria = (criteria: string | null): string[] => {
   if (!criteria) return [];
   
   try {
-    // If it's already an array, map each item to string
-    if (Array.isArray(criteria)) {
-      return criteria.map(item => String(item));
+    // Try to parse as JSON first
+    const parsed = JSON.parse(criteria);
+    if (Array.isArray(parsed)) {
+      return parsed.map(item => String(item));
     }
-    
-    // If it's a JSON string, parse it first
-    if (typeof criteria === 'string') {
-      try {
-        const parsed = JSON.parse(criteria);
-        if (Array.isArray(parsed)) {
-          return parsed.map(item => String(item));
-        }
-      } catch (e) {
-        // If not valid JSON, split by newlines or return as single item
-        return criteria.includes('\n') 
-          ? criteria.split('\n').filter(item => item.trim() !== '')
-          : [criteria];
-      }
+    // If not an array but parsed successfully, return as single item
+    if (parsed) {
+      return [String(parsed)];
     }
-    
-    // Fallback: return empty array
-    return [];
   } catch (e) {
-    console.error("Error parsing acceptance criteria:", e);
-    return [];
+    // If not valid JSON, split by newlines or return as single item
+    if (criteria.includes('\n')) {
+      return criteria.split('\n').filter(item => item.trim() !== '');
+    }
+    return [criteria];
   }
+  
+  // Fallback: return empty array
+  return [];
 };
 
 // Helper function to determine priority from string
@@ -148,7 +140,7 @@ export const getStoriesByProject = async (projectId: string | null): Promise<Use
       goal: item.goal,
       benefit: item.benefit,
       priority: determinePriority(item.description || ""), // Use helper function
-      acceptanceCriteria: parseAcceptanceCriteria(item.acceptance_criteria), // Ensure we parse to string array
+      acceptanceCriteria: parseAcceptanceCriteria(item.acceptance_criteria), // Parse text to string array
       additionalNotes: item.description,
       projectId: item.project_id,
       projectName: item.projects?.name,
