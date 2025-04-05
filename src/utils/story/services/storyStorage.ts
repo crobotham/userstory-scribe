@@ -12,7 +12,7 @@ export const saveStoryToLocalStorage = async (story: UserStory): Promise<void> =
   }
   
   try {
-    console.log("Saving story to Supabase with acceptance criteria:", story.acceptanceCriteria);
+    console.log("Saving story to Supabase");
     
     const { error } = await supabase.from('user_stories').insert({
       id: story.id,
@@ -23,7 +23,6 @@ export const saveStoryToLocalStorage = async (story: UserStory): Promise<void> =
       persona: story.role,
       goal: story.goal,
       benefit: story.benefit,
-      // Convert acceptance criteria to a JSON string
       acceptance_criteria: JSON.stringify(story.acceptanceCriteria || [])
     });
     
@@ -31,8 +30,6 @@ export const saveStoryToLocalStorage = async (story: UserStory): Promise<void> =
       console.error("Error saving story to Supabase:", error);
       throw error;
     }
-    
-    console.log("Story saved to Supabase successfully:", story.id);
   } catch (err) {
     console.error("Error saving story to Supabase:", err);
     throw err;
@@ -41,8 +38,7 @@ export const saveStoryToLocalStorage = async (story: UserStory): Promise<void> =
 
 // Update story in Supabase
 export const updateStoryInLocalStorage = async (updatedStory: UserStory): Promise<void> => {
-  console.log("Starting story update process for ID:", updatedStory.id);
-  console.log("Acceptance criteria to save:", updatedStory.acceptanceCriteria);
+  console.log("Updating story with ID:", updatedStory.id);
   
   // Get current user
   const { data: { user } } = await supabase.auth.getUser();
@@ -52,20 +48,17 @@ export const updateStoryInLocalStorage = async (updatedStory: UserStory): Promis
   }
   
   try {
-    // Sanitize data to ensure it's compatible with database schema
+    // Prepare data for update - only include fields that are needed
     const sanitizedStory = {
       project_id: updatedStory.projectId || null,
-      title: `As a ${updatedStory.role}, I want to ${updatedStory.goal}, so that ${updatedStory.benefit}.`,
+      title: updatedStory.storyText,
       description: updatedStory.additionalNotes || '',
       persona: updatedStory.role || '',
       goal: updatedStory.goal || '',
       benefit: updatedStory.benefit || '',
-      // Convert acceptance criteria to a JSON string, ensure it's an array
       acceptance_criteria: JSON.stringify(updatedStory.acceptanceCriteria || []),
       updated_at: new Date().toISOString()
     };
-
-    console.log("Sending update to Supabase with data:", JSON.stringify(sanitizedStory));
     
     // Update the story in Supabase
     const { error } = await supabase
@@ -78,8 +71,6 @@ export const updateStoryInLocalStorage = async (updatedStory: UserStory): Promis
       console.error("Error updating in Supabase:", error);
       throw new Error(`Database update error: ${error.message}`);
     }
-
-    console.log("Story update successful in Supabase for ID:", updatedStory.id);
   } catch (err) {
     console.error("Error updating story:", err);
     throw err;

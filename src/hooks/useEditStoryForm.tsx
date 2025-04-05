@@ -110,7 +110,7 @@ export const useEditStoryForm = (
     setError(null);
     
     try {
-      console.log("Preparing to save story:", editedStory.id);
+      console.log("Saving story with ID:", editedStory.id);
       
       // Make sure the story text is correctly formed
       const storyText = `As a ${editedStory.role}, I want to ${editedStory.goal}, so that ${editedStory.benefit}.`;
@@ -119,18 +119,25 @@ export const useEditStoryForm = (
         storyText
       };
       
+      // Optimistically close the dialog and show toast to improve perceived performance
+      onClose();
+      
+      toast({
+        title: "Saving story...",
+        description: "Your changes are being saved.",
+      });
+      
       // Save to Supabase
       await updateStoryInLocalStorage(storyToSave);
       
-      // Success
+      // Notify parent components
+      onStoryUpdated();
+      
+      // Success toast
       toast({
         title: "Story updated",
         description: "Your user story has been updated successfully.",
       });
-      
-      // Notify parent components
-      onStoryUpdated();
-      onClose();
     } catch (error) {
       console.error("Error updating story:", error);
       
@@ -144,8 +151,6 @@ export const useEditStoryForm = (
           errorMessage = errorText;
         }
       }
-      
-      setError(errorMessage);
       
       // Show toast with error details
       toast({

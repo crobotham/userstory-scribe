@@ -33,19 +33,9 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ onProjectsChanged
     handleUpdateProject,
     handleDeleteProject,
     handleProjectSelect,
-    handleBackToProjects
+    handleBackToProjects,
+    handleStoryUpdated
   } = useProjectManagementState(onProjectsChanged);
-
-  // Handle project creation with proper dialog closure
-  const createProject = async (name: string, description?: string) => {
-    try {
-      const result = await handleCreateProject(name, description);
-      return result;
-    } catch (error) {
-      console.error("Project creation error:", error);
-      throw error; // Re-throw to allow handling in the dialog
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -72,13 +62,14 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ onProjectsChanged
           stories={projectStories}
           isLoading={isLoadingStories}
           onBackClick={handleBackToProjects}
+          onStoryUpdated={handleStoryUpdated}
         />
       )}
 
       <NewProjectDialog
         isOpen={isNewProjectDialogOpen}
         onClose={() => setIsNewProjectDialogOpen(false)}
-        onCreateProject={createProject}
+        onCreateProject={handleCreateProject}
       />
 
       <EditProjectDialog

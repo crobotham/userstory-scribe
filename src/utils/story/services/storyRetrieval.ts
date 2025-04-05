@@ -2,7 +2,7 @@
 import { UserStory, Project } from '../types';
 import { supabase } from "@/integrations/supabase/client";
 
-// Retrieve stories from Supabase for the logged-in user
+// Optimize story retrieval function
 export const getStoriesFromLocalStorage = async (): Promise<UserStory[]> => {
   console.log("Retrieving all stories from Supabase");
   
@@ -38,46 +38,11 @@ export const getStoriesFromLocalStorage = async (): Promise<UserStory[]> => {
     
     // If no stories found, return an empty array
     if (!data || data.length === 0) {
-      console.log("No stories found for user:", user.id);
       return [];
     }
     
     // Transform the data into UserStory objects
-    return data.map(story => {
-      // Parse the acceptance criteria from JSON string to array, handling fallbacks
-      let acceptanceCriteria: string[] = [];
-      
-      if (story.acceptance_criteria) {
-        try {
-          // Try to parse the JSON string
-          acceptanceCriteria = JSON.parse(story.acceptance_criteria);
-          // Ensure it's an array
-          if (!Array.isArray(acceptanceCriteria)) {
-            acceptanceCriteria = [];
-          }
-        } catch (e) {
-          console.error("Error parsing acceptance criteria:", e);
-          acceptanceCriteria = [];
-        }
-      }
-      
-      // Use project name from the joined projects table
-      const projectName = story.projects ? story.projects.name : undefined;
-      
-      return {
-        id: story.id,
-        storyText: story.title,
-        role: story.persona,
-        goal: story.goal,
-        benefit: story.benefit,
-        additionalNotes: story.description,
-        acceptanceCriteria: acceptanceCriteria,
-        createdAt: new Date(story.created_at),
-        projectId: story.project_id,
-        projectName: projectName,
-        priority: "Medium" // Default priority since it's not stored
-      };
-    });
+    return transformStoriesData(data);
   } catch (error) {
     console.error("Error retrieving stories:", error);
     throw error;
@@ -121,48 +86,52 @@ export const getStoriesByProject = async (projectId: string): Promise<UserStory[
     
     // If no stories found, return an empty array
     if (!data || data.length === 0) {
-      console.log("No stories found for project:", projectId);
       return [];
     }
     
     // Use the common function to transform the data
-    return data.map(story => {
-      // Parse the acceptance criteria from JSON string to array, handling fallbacks
-      let acceptanceCriteria: string[] = [];
-      
-      if (story.acceptance_criteria) {
-        try {
-          // Try to parse the JSON string
-          acceptanceCriteria = JSON.parse(story.acceptance_criteria);
-          // Ensure it's an array
-          if (!Array.isArray(acceptanceCriteria)) {
-            acceptanceCriteria = [];
-          }
-        } catch (e) {
-          console.error("Error parsing acceptance criteria:", e);
-          acceptanceCriteria = [];
-        }
-      }
-      
-      // Use project name from the joined projects table
-      const projectName = story.projects ? story.projects.name : undefined;
-      
-      return {
-        id: story.id,
-        storyText: story.title,
-        role: story.persona,
-        goal: story.goal,
-        benefit: story.benefit,
-        additionalNotes: story.description,
-        acceptanceCriteria: acceptanceCriteria,
-        createdAt: new Date(story.created_at),
-        projectId: story.project_id,
-        projectName: projectName,
-        priority: "Medium" // Default priority since it's not stored
-      };
-    });
+    return transformStoriesData(data);
   } catch (error) {
     console.error("Error retrieving stories for project:", error);
     throw error;
   }
 };
+
+// Helper function to transform database response into UserStory objects
+function transformStoriesData(data: any[]): UserStory[] {
+  return data.map(story => {
+    // Parse the acceptance criteria from JSON string to array, handling fallbacks
+    let acceptanceCriteria: string[] = [];
+    
+    if (story.acceptance_criteria) {
+      try {
+        // Try to parse the JSON string
+        acceptanceCriteria = JSON.parse(story.acceptance_criteria);
+        // Ensure it's an array
+        if (!Array.isArray(acceptanceCriteria)) {
+          acceptanceCriteria = [];
+        }
+      } catch (e) {
+        console.error("Error parsing acceptance criteria:", e);
+        acceptanceCriteria = [];
+      }
+    }
+    
+    // Use project name from the joined projects table
+    const projectName = story.projects ? story.projects.name : undefined;
+    
+    return {
+      id: story.id,
+      storyText: story.title,
+      role: story.persona,
+      goal: story.goal,
+      benefit: story.benefit,
+      additionalNotes: story.description,
+      acceptanceCriteria: acceptanceCriteria,
+      createdAt: new Date(story.created_at),
+      projectId: story.project_id,
+      projectName: projectName,
+      priority: "Medium" // Default priority since it's not stored
+    };
+  });
+}

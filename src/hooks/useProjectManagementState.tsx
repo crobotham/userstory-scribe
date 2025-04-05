@@ -95,6 +95,12 @@ export const useProjectManagementState = (onProjectsChanged: () => void) => {
     setProjectStories([]);
   };
   
+  const handleStoryUpdated = async () => {
+    if (selectedProject) {
+      await loadProjectStories(selectedProject.id);
+    }
+  };
+  
   // Initialize the specialized hooks
   const projectCreate = useProjectCreate(loadProjects);
   const projectUpdate = useProjectUpdate(loadProjects);
@@ -131,6 +137,9 @@ export const useProjectManagementState = (onProjectsChanged: () => void) => {
     // Project navigation
     handleProjectSelect,
     handleBackToProjects,
+    
+    // Story operations
+    handleStoryUpdated,
     
     // Data loading
     loadProjects

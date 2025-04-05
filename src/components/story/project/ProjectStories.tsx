@@ -62,10 +62,6 @@ const ProjectStories: React.FC<ProjectStoriesProps> = ({
 
   const handleStoryUpdated = () => {
     onStoryUpdated();
-    toast({
-      title: "Story updated",
-      description: "Your user story has been updated successfully.",
-    });
   };
 
   return (
@@ -118,7 +114,7 @@ const ProjectStories: React.FC<ProjectStoriesProps> = ({
         setIsDeleteDialogOpen={setIsDeleteDialogOpen}
         setStoryToDelete={setStoryToDelete}
         setIsDetailViewOpen={setIsDetailViewOpen}
-        onStoryUpdated={onStoryUpdated}
+        onStoryUpdated={handleStoryUpdated}
       />
     </div>
   );
