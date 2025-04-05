@@ -29,7 +29,7 @@ export const getStoriesFromLocalStorage = async (): Promise<UserStory[]> => {
         projects(name)
       `)
       .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
+      .order('updated_at', { ascending: false });
     
     if (error) {
       console.error("Error retrieving stories from Supabase:", error);
@@ -77,7 +77,7 @@ export const getStoriesByProject = async (projectId: string): Promise<UserStory[
       `)
       .eq('user_id', user.id)
       .eq('project_id', projectId)
-      .order('created_at', { ascending: false });
+      .order('updated_at', { ascending: false });
     
     if (error) {
       console.error("Error retrieving stories for project from Supabase:", error);

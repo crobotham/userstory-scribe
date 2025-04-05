@@ -119,25 +119,21 @@ export const useEditStoryForm = (
         storyText
       };
       
-      // Optimistically close the dialog and show toast to improve perceived performance
-      onClose();
-      
-      toast({
-        title: "Saving story...",
-        description: "Your changes are being saved.",
-      });
-      
       // Save to Supabase
       await updateStoryInLocalStorage(storyToSave);
-      
-      // Notify parent components
-      onStoryUpdated();
       
       // Success toast
       toast({
         title: "Story updated",
         description: "Your user story has been updated successfully.",
       });
+      
+      // Notify parent components to refresh data
+      onStoryUpdated();
+      
+      // Close the modal after successful save
+      onClose();
+      
     } catch (error) {
       console.error("Error updating story:", error);
       
@@ -158,6 +154,9 @@ export const useEditStoryForm = (
         description: errorMessage,
         variant: "destructive",
       });
+      
+      // Don't close the dialog on error
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

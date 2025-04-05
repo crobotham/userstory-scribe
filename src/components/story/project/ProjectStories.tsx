@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Project, UserStory } from "@/utils/story";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
@@ -61,7 +61,11 @@ const ProjectStories: React.FC<ProjectStoriesProps> = ({
   };
 
   const handleStoryUpdated = () => {
+    console.log("Story update detected in ProjectStories");
     onStoryUpdated();
+    
+    // Close the modal after story is updated
+    setIsEditModalOpen(false);
   };
 
   return (
@@ -114,7 +118,7 @@ const ProjectStories: React.FC<ProjectStoriesProps> = ({
         setIsDeleteDialogOpen={setIsDeleteDialogOpen}
         setStoryToDelete={setStoryToDelete}
         setIsDetailViewOpen={setIsDetailViewOpen}
-        onStoryUpdated={handleStoryUpdated}
+        onStoryUpdated={onStoryUpdated}
       />
     </div>
   );
