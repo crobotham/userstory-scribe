@@ -17,7 +17,8 @@ const StoriesGrid: React.FC<StoriesGridProps> = ({ stories, onEdit, onView, onDe
         <StoryCard
           key={story.id}
           story={story}
-          onClick={onView}
+          // Change the main onClick to use onEdit instead of onView
+          onClick={onEdit}
           onEdit={onEdit}
           onDelete={onDelete}
         />
@@ -27,3 +28,4 @@ const StoriesGrid: React.FC<StoriesGridProps> = ({ stories, onEdit, onView, onDe
 };
 
 export default StoriesGrid;
+
