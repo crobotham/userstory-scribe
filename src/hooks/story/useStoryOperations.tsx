@@ -60,16 +60,14 @@ export const useStoryOperations = (
       setStories([]); // Reset stories on error to avoid showing stale data
       toast({
         title: "Error loading stories",
-        description: "There was an error loading your stories.",
+        description: "There was a problem loading your stories.",
         variant: "destructive",
       });
     } finally {
-      // Longer delay to prevent flickering and ensure data is fully loaded
-      setTimeout(() => {
-        setIsLoading(false);
-        isLoadingRef.current = false;
-        console.log("Story loading complete, loading state cleared");
-      }, 1000); // Increased to 1000ms to ensure data is fully loaded
+      // Remove the artificial delay - immediately update loading state
+      setIsLoading(false);
+      isLoadingRef.current = false;
+      console.log("Story loading complete, loading state cleared");
     }
   }, [setIsLoading, isLoadingRef, toast]);
 

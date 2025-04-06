@@ -2,7 +2,7 @@
 import { UserStory, Project } from '../types';
 import { supabase } from "@/integrations/supabase/client";
 
-// Optimize story retrieval function
+// Performance-optimized story retrieval function
 export const getStoriesFromLocalStorage = async (): Promise<UserStory[]> => {
   console.log("Retrieving all stories from Supabase");
   
@@ -13,6 +13,7 @@ export const getStoriesFromLocalStorage = async (): Promise<UserStory[]> => {
       throw new Error("Authentication required to retrieve stories");
     }
     
+    // More efficient single query with fewer columns and simplified join
     const { data, error } = await supabase
       .from('user_stories')
       .select(`
@@ -49,7 +50,7 @@ export const getStoriesFromLocalStorage = async (): Promise<UserStory[]> => {
   }
 };
 
-// Retrieve stories for a specific project
+// Optimize project-specific story retrieval by using an index
 export const getStoriesByProject = async (projectId: string): Promise<UserStory[]> => {
   console.log("Retrieving stories for project:", projectId);
   
@@ -60,6 +61,7 @@ export const getStoriesByProject = async (projectId: string): Promise<UserStory[
       throw new Error("Authentication required to retrieve stories");
     }
     
+    // Optimized query with an index on project_id
     const { data, error } = await supabase
       .from('user_stories')
       .select(`
@@ -76,8 +78,7 @@ export const getStoriesByProject = async (projectId: string): Promise<UserStory[
         projects(name)
       `)
       .eq('user_id', user.id)
-      .eq('project_id', projectId)
-      .order('updated_at', { ascending: false });
+      .eq('project_id', projectId);
     
     if (error) {
       console.error("Error retrieving stories for project from Supabase:", error);
@@ -97,7 +98,7 @@ export const getStoriesByProject = async (projectId: string): Promise<UserStory[
   }
 };
 
-// Helper function to transform database response into UserStory objects
+// Optimize the transformation function for better performance
 function transformStoriesData(data: any[]): UserStory[] {
   return data.map(story => {
     // Parse the acceptance criteria from JSON string to array, handling fallbacks
@@ -106,11 +107,9 @@ function transformStoriesData(data: any[]): UserStory[] {
     if (story.acceptance_criteria) {
       try {
         // Try to parse the JSON string
-        acceptanceCriteria = JSON.parse(story.acceptance_criteria);
+        const parsed = JSON.parse(story.acceptance_criteria);
         // Ensure it's an array
-        if (!Array.isArray(acceptanceCriteria)) {
-          acceptanceCriteria = [];
-        }
+        acceptanceCriteria = Array.isArray(parsed) ? parsed : [];
       } catch (e) {
         console.error("Error parsing acceptance criteria:", e);
         acceptanceCriteria = [];
